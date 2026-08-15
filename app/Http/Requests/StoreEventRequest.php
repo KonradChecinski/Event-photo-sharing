@@ -20,7 +20,7 @@ class StoreEventRequest extends FormRequest
             'description' => ['nullable', 'string', 'max:3000'],
             'status' => ['required', Rule::in(['draft', 'active', 'inactive', 'finished'])],
             'starts_at' => ['nullable', 'date'],
-            'ends_at' => ['nullable', 'date', 'after_or_equal:starts_at']
+            'ends_at' => ['nullable', 'date', 'after_or_equal:starts_at'],
         ];
     }
 }

@@ -24,7 +24,7 @@ class UpdateEventAppearanceRequest extends FormRequest
             'secondary_color' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'text_color' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'background_color' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
-            'status' => ['sometimes', Rule::in(['draft', 'active', 'inactive', 'finished'])]
+            'status' => ['sometimes', Rule::in(['draft', 'active', 'inactive', 'finished'])],
         ];
     }
 }

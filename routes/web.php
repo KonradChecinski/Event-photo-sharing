@@ -6,7 +6,7 @@ use App\Http\Controllers\GuestEventController;
 use App\Http\Controllers\GuestPhotoController;
 use Illuminate\Support\Facades\Route;
 
-//Route::inertia('/', 'welcome')->name('home');
+Route::inertia('/', 'welcome')->name('home');
 Route::get('/e/{event}', [GuestEventController::class, 'show'])->name('events.show');
 Route::post('/e/{event}/photos', [GuestPhotoController::class, 'store'])->middleware('throttle:guest-upload')->name('guest.photos.store');
 Route::delete('/e/{event}/photos/{photo}', [GuestPhotoController::class, 'destroy'])->middleware('throttle:guest-sensitive')->name('guest.photos.destroy');

@@ -23,7 +23,7 @@ class Event extends Model
         'primary_color',
         'secondary_color',
         'text_color',
-        'background_color'
+        'background_color',
     ];
 
     protected $attributes = [
@@ -31,14 +31,14 @@ class Event extends Model
         'primary_color' => '#6D28D9',
         'secondary_color' => '#EC4899',
         'text_color' => '#FFFFFF',
-        'background_color' => '#1E1B4B'
+        'background_color' => '#1E1B4B',
     ];
 
     protected function casts(): array
     {
         return [
             'starts_at' => 'datetime',
-            'ends_at' => 'datetime'
+            'ends_at' => 'datetime',
         ];
     }
 

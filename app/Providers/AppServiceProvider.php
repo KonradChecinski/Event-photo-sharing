@@ -18,9 +18,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->configureDefaults();
-        RateLimiter::for('guest-upload', fn (Request $request): Limit => Limit::perMinute(12)->by($request->ip().'|'.(is_object($request->route('event')) ? $request->route('event')->id : $request->route('event'))));
-        RateLimiter::for('guest-sensitive', fn (Request $request): Limit => Limit::perMinute(90)->by($request->ip()));
+        //
     }
 
     /**
@@ -29,6 +27,16 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        $this->configureRateLimiting();
+    }
+
+    /**
+     * Configure rate limiting.
+     */
+    protected function configureRateLimiting(): void
+    {
+        RateLimiter::for('guest-upload', fn (Request $request): Limit => Limit::perMinute(12)->by($request->ip().'|'.(is_object($request->route('event')) ? $request->route('event')->id : $request->route('event'))));
+        RateLimiter::for('guest-sensitive', fn (Request $request): Limit => Limit::perMinute(90)->by($request->ip()));
     }
 
     /**

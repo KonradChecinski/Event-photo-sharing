@@ -24,13 +24,13 @@ class Photo extends Model
         'file_size',
         'width',
         'height',
-        'deleted_at'
+        'deleted_at',
     ];
 
     protected function casts(): array
     {
         return [
-            'deleted_at' => 'datetime'
+            'deleted_at' => 'datetime',
         ];
     }
 

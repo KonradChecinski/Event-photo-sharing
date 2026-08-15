@@ -13,9 +13,8 @@ use RuntimeException;
 class PhotoStorageService
 {
     private const THUMBNAIL_MAX_EDGE = 480;
+
     private const PREVIEW_MAX_EDGE = 1920;
-
-
 
     public function store(EventGuest $guest, UploadedFile $file): Photo
     {

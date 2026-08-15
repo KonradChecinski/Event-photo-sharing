@@ -18,7 +18,7 @@ class EventController extends Controller
 
         return Inertia::render('admin/events/index',
             [
-                'events' => $events
+                'events' => $events,
             ]
         );
     }
@@ -40,9 +40,9 @@ class EventController extends Controller
                 'stats' => [
                     'photos' => $event->photos()->count(),
                     'guests' => $event->guests()->count(),
-                    'deletedPhotos' => $event->photos()->whereNotNull('deleted_at')->count()
+                    'deletedPhotos' => $event->photos()->whereNotNull('deleted_at')->count(),
                 ],
-                'eventUrl' => route('events.show', $event)
+                'eventUrl' => route('events.show', $event),
             ]
         );
     }

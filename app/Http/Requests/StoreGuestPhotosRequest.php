@@ -20,8 +20,8 @@ class StoreGuestPhotosRequest extends FormRequest
                 'file',
                 'max:20480',
                 'mimes:jpg,jpeg,png,webp,heic,heif',
-                'mimetypes:image/jpeg,image/png,image/webp,image/heic,image/heif'
-            ]
+                'mimetypes:image/jpeg,image/png,image/webp,image/heic,image/heif',
+            ],
         ];
     }
 }

@@ -16,11 +16,11 @@ class EventGuest extends Model
 
     protected $fillable = [
         'event_id',
-        'token_hash'
+        'token_hash',
     ];
 
     protected $hidden = [
-        'token_hash'
+        'token_hash',
     ];
 
     protected static function booted(): void

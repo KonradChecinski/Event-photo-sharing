@@ -22,16 +22,15 @@ class PhotoController extends Controller
                 'photos' => $event->photos()->with('guest:id,uuid')
                     ->latest()
                     ->paginate(36)
-                    ->through(fn ($photo) =>
-                        [
-                            'uuid' => $photo->uuid,
-                            'thumbnail' => route('admin.photos.file', [$event, $photo, 'thumbnail']),
-                            'preview' => route('admin.photos.file', [$event, $photo, 'preview']),
-                            'deletedAt' => $photo->deleted_at?->toIso8601String(),
-                            'createdAt' => $photo->created_at->toIso8601String(),
-                            'guest' => $photo->guest->uuid
-                        ]
-                    )
+                    ->through(fn ($photo) => [
+                        'uuid' => $photo->uuid,
+                        'thumbnail' => route('admin.photos.file', [$event, $photo, 'thumbnail']),
+                        'preview' => route('admin.photos.file', [$event, $photo, 'preview']),
+                        'deletedAt' => $photo->deleted_at?->toIso8601String(),
+                        'createdAt' => $photo->created_at->toIso8601String(),
+                        'guest' => $photo->guest->uuid,
+                    ]
+                    ),
             ]
         );
     }
@@ -82,6 +81,6 @@ class PhotoController extends Controller
             }
         } $zip->close();
 
-        return response()->download($zipPath,'event-'.$event->uuid.'.zip')->deleteFileAfterSend();
+        return response()->download($zipPath, 'event-'.$event->uuid.'.zip')->deleteFileAfterSend();
     }
 }
