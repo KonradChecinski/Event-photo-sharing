@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "laravel-boost": {
+      "command": "D:\\PHP8.5.9TS\\php.exe",
+      "args": [
+        "F:\\MagdaIArek\\Event-photo-sharing4\\artisan",
+        "boost:mcp"
+      ]
+    }
+  }
+}
