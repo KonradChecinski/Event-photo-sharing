@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Controllers\Admin\EventController as AdminEventController;
+use App\Http\Controllers\Admin\PhotoController as AdminPhotoController;
+use App\Http\Controllers\GuestEventController;
+use App\Http\Controllers\GuestPhotoController;
 use Illuminate\Support\Facades\Route;
 
 //Route::inertia('/', 'welcome')->name('home');
