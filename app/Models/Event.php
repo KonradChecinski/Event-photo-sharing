@@ -15,16 +15,23 @@ class Event extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name', 'description',
-        'status', 'starts_at',
-        'ends_at', 'welcome_title',
-        'welcome_text', 'hero_image',
-        'welcome_image', 'logo',
+        'name',
+        'description',
+        'status',
+        'starts_at',
+        'ends_at',
+        'welcome_title',
+        'welcome_text',
+        'hero_image',
+        'welcome_image',
+        'logo',
         'primary_color',
         'secondary_color',
         'text_color',
         'background_color',
     ];
+
+//    protected $hidden = ['uuid', 'slug'];
 
     protected $attributes = [
         'status' => 'draft',
@@ -44,9 +51,10 @@ class Event extends Model
 
     protected static function booted(): void
     {
+
         static::creating(function (self $event): void {
-            $event->uuid ??= (string) Str::uuid();
-            $event->slug ??= Str::slug($event->name).'-'.Str::lower(Str::random(6));
+            $event->uuid = (string) Str::uuid();
+            $event->slug = Str::slug($event->name).'-'.Str::lower(Str::random(6));
         });
     }
 

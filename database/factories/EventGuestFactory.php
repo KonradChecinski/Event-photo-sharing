@@ -10,6 +10,9 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 {
     public function definition(): array
     {
-        return ['event_id' => Event::factory(), 'token_hash' => hash('sha256', fake()->uuid())];
+        return [
+            'event_id' => Event::factory(),
+            'token_hash' => hash('sha256', fake()->uuid())
+        ];
     }
 }

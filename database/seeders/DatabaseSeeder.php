@@ -12,7 +12,7 @@ use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
+//    use WithoutModelEvents;
 
     /**
      * Seed the application's database.
@@ -20,16 +20,45 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $permissions = ['events.create', 'events.delete'];
+
         foreach ($permissions as $permission) {
             Permission::findOrCreate($permission);
-        } $superadmin = Role::findOrCreate('superadmin');
+        }
+        app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+
+        $superadmin = Role::findOrCreate('superadmin');
         $eventAdmin = Role::findOrCreate('event_admin');
         $superadmin->syncPermissions($permissions);
-        $admin = User::firstOrCreate(['email' => 'admin@example.test'], ['name' => 'Superadmin', 'password' => Hash::make('ChangeMe!2026')]);
+
+        app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@example.test'],
+            [
+                'name' => 'Superadmin',
+                'password' => Hash::make('ChangeMe!2026')
+            ]
+        );
         $admin->assignRole($superadmin);
-        $manager = User::firstOrCreate(['email' => 'event-admin@example.test'], ['name' => 'Event Admin', 'password' => Hash::make('ChangeMe!2026')]);
+
+
+        $manager = User::firstOrCreate(
+            ['email' => 'event-admin@example.test'],
+            [
+                'name' => 'Event Admin',
+                'password' => Hash::make('ChangeMe!2026')
+            ]
+        );
         $manager->assignRole($eventAdmin);
-        $event = Event::firstOrCreate(['name' => 'Przykładowe wydarzenie'], ['status' => 'active', 'welcome_title' => 'Witaj na wydarzeniu!', 'welcome_text' => 'Dodaj swoje najlepsze kadry.']);
+
+        $event = Event::firstOrCreate(
+            ['name' => 'Przykładowe wydarzenie'],
+            [
+                'status' => 'active',
+                'welcome_title' => 'Witaj na wydarzeniu!',
+                'welcome_text' => 'Dodaj swoje najlepsze kadry.'
+            ]
+        );
         $event->administrators()->syncWithoutDetaching([$manager->id]);
     }
 }

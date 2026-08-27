@@ -30,6 +30,11 @@ class GuestEventController extends Controller
                     'text' => $event->text_color,
                     'background' => $event->background_color,
                 ],
+                'images' => [
+                    'hero' => $event->hero_image ? route('events.hero', $event) : null,
+                    'welcome' => $event->welcome_image ? route('events.welcome', $event) : null,
+                    'logo' => $event->logo ? route('events.logo', $event) : null,
+                ],
             ],
             'photos' => Inertia::scroll(
                 $guest->photos()

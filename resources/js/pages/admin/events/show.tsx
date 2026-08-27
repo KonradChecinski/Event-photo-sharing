@@ -125,7 +125,7 @@ export default function EventShow({
                                         )
                                     }
                                 />
-                                <Stack direction="row" spacing={2}>
+                                <Stack direction="column" spacing={2}>
                                     {(
                                         [
                                             'primary_color',
@@ -145,6 +145,7 @@ export default function EventShow({
                                                     e.target.value,
                                                 )
                                             }
+                                            sx={{ width: 200, height: 50, p: 0 }}
                                         />
                                     ))}
                                 </Stack>

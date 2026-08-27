@@ -1,4 +1,4 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, router, useForm } from '@inertiajs/react';
 import { Add } from '@mui/icons-material';
 import {
     Box,
@@ -50,9 +50,7 @@ export default function EventsIndex({ events }: { events: Event[] }) {
                     {events.map((event) => (
                         <Grid key={event.uuid} size={{ xs: 12, md: 6 }}>
                             <Card
-                                onClick={() =>
-                                    window.location.assign(show(event).url)
-                                }
+                                onClick={() => router.visit(show(event).url)}
                                 sx={{
                                     cursor: 'pointer',
                                     '&:hover': { boxShadow: 6 },
