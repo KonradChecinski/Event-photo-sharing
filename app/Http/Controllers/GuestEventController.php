@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\Photo;
 use App\Services\EventGuestIdentity;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -31,9 +32,9 @@ class GuestEventController extends Controller
                     'background' => $event->background_color,
                 ],
                 'images' => [
-                    'hero' => $event->hero_image ? route('events.hero', $event) : null,
+//                    'hero' => $event->hero_image ? route('events.hero', $event) : null,
                     'welcome' => $event->welcome_image ? route('events.welcome', $event) : null,
-                    'logo' => $event->logo ? route('events.logo', $event) : null,
+//                    'logo' => $event->logo ? route('events.logo', $event) : null,
                 ],
             ],
             'photos' => Inertia::scroll(
@@ -61,5 +62,37 @@ class GuestEventController extends Controller
             'preview' => route('guest.photos.preview', $photo),
             'createdAt' => $photo->created_at->toIso8601String(),
         ];
+    }
+
+    public function welcome(Request $request, Event $event, EventGuestIdentity $identity)
+    {
+        // ensure the event is visible to guests
+        abort_unless($event->status !== 'draft', 404);
+
+        // resolve guest identity (ensures access and may set a cookie)
+        [$guest, $cookie] = $identity->resolve($request, $event);
+
+        // ensure we have a welcome image path
+        abort_unless($event->welcome_image, 404);
+
+        $disk = Storage::disk(config('filesystems.default'));
+        $path = $event->welcome_image;
+
+        abort_unless($disk->exists($path), 404);
+
+        $mimeType = null;
+        try {
+            $mimeType = $disk->mimeType($path);
+        } catch (\Throwable $e) {
+            // ignore and fallback
+        }
+
+        $response = $disk->response($path, null, ['Content-Type' => $mimeType ?? 'image/jpeg']);
+
+        if ($cookie) {
+            $response->headers->setCookie($cookie);
+        }
+
+        return $response;
     }
 }

@@ -25,6 +25,8 @@ class UpdateEventAppearanceRequest extends FormRequest
             'text_color' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'background_color' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'status' => ['sometimes', Rule::in(['draft', 'active', 'inactive', 'finished'])],
+            // allow replacing welcome image when updating appearance
+            'welcome_image' => ['nullable', 'image', 'max:5120'],
         ];
     }
 }

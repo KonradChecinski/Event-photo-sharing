@@ -7,6 +7,7 @@ use App\Http\Requests\StoreEventRequest;
 use App\Http\Requests\UpdateEventAppearanceRequest;
 use App\Models\Event;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -25,7 +26,21 @@ class EventController extends Controller
 
     public function store(StoreEventRequest $request): RedirectResponse
     {
-        $event = Event::create($request->validated());
+        $data = $request->validated();
+        $file = $request->file('welcome_image');
+
+        // remove file from mass-assigned data as it needs special handling
+        if ($file) {
+            unset($data['welcome_image']);
+        }
+
+        $event = Event::create($data);
+
+        if ($file) {
+            $extension = Str::lower($file->guessExtension() ?: $file->extension());
+            $path = $file->storeAs('events/'.$event->uuid.'/settings_images', Str::uuid().'.'.$extension, config('filesystems.default'));
+            $event->update(['welcome_image' => $path]);
+        }
 
         return to_route('admin.events.index')->with('success', 'Wydarzenie utworzone.');
     }
@@ -49,7 +64,16 @@ class EventController extends Controller
 
     public function update(UpdateEventAppearanceRequest $request, Event $event): RedirectResponse
     {
-        $event->update($request->validated());
+        $data = $request->validated();
+
+        if ($request->hasFile('welcome_image')) {
+            $file = $request->file('welcome_image');
+            $extension = Str::lower($file->guessExtension() ?: $file->extension());
+            $path = $file->storeAs('events/'.$event->uuid.'/settings_images', Str::uuid().'.'.$extension, config('filesystems.default'));
+            $data['welcome_image'] = $path;
+        }
+
+        $event->update($data);
 
         return back()->with('success', 'Konfiguracja wydarzenia zapisana.');
     }

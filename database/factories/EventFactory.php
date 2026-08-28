@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
             'description' => fake()->paragraph(),
             'status' => 'active',
             'welcome_title' => 'Witaj!',
-            'welcome_text' => 'Podziel się swoimi zdjęciami.'
+            'welcome_text' => 'Podziel się swoimi zdjęciami.',
         ];
     }
 
@@ -22,7 +22,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
     {
         return $this->state(
             [
-                'status' => 'finished'
+                'status' => 'finished',
             ]
         );
     }

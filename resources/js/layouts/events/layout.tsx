@@ -8,9 +8,9 @@ export default function EventsLayout({ children }: PropsWithChildren) {
     const { isCurrentOrParentUrl } = useCurrentUrl();
 
     return (
-        <div className="">
-            <div className="flex-1 md:max-w-2xl">
-                <section className="max-w-xl space-y-12">{children}</section>
+        <div className="h-full">
+            <div className="flex-1">
+                <section className="space-y-12">{children}</section>
             </div>
         </div>
     );

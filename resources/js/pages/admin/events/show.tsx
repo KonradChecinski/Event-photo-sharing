@@ -40,6 +40,7 @@ export default function EventShow({
         text_color: event.text_color,
         background_color: event.background_color,
         status: event.status,
+        welcome_image: null,
     });
 
     return (
@@ -122,6 +123,16 @@ export default function EventShow({
                                         form.setData(
                                             'welcome_text',
                                             e.target.value,
+                                        )
+                                    }
+                                />
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) =>
+                                        form.setData(
+                                            'welcome_image',
+                                            e.target.files ? e.target.files[0] : null,
                                         )
                                     }
                                 />

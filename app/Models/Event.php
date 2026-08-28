@@ -31,7 +31,7 @@ class Event extends Model
         'background_color',
     ];
 
-//    protected $hidden = ['uuid', 'slug'];
+    //    protected $hidden = ['uuid', 'slug'];
 
     protected $attributes = [
         'status' => 'draft',

@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
     {
         return [
             'event_id' => Event::factory(),
-            'token_hash' => hash('sha256', fake()->uuid())
+            'token_hash' => hash('sha256', fake()->uuid()),
         ];
     }
 }

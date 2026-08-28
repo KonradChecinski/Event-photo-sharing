@@ -7,8 +7,18 @@
 
 @custom-variant dark (&:is(.dark *));
 
+
+@font-face {
+    font-family: "CaveatBrush";
+    src: url("../fonts/CaveatBrush-Regular.ttf");
+    font-weight: normal;
+    font-style: normal;
+}
+
+
 @theme {
     --font-sans:
+        /*'CaveatBrush',*/
         'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
         'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
         'Noto Color Emoji';
@@ -141,3 +151,4 @@
         @apply bg-background text-foreground;
     }
 }
+

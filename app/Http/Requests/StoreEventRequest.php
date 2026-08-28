@@ -21,6 +21,8 @@ class StoreEventRequest extends FormRequest
             'status' => ['required', Rule::in(['draft', 'active', 'inactive', 'finished'])],
             'starts_at' => ['nullable', 'date'],
             'ends_at' => ['nullable', 'date', 'after_or_equal:starts_at'],
+            // welcome image for the event settings
+            'welcome_image' => ['nullable', 'image', 'max:5120'],
         ];
     }
 }

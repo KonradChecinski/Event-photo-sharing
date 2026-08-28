@@ -9,10 +9,11 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class DatabaseSeeder extends Seeder
 {
-//    use WithoutModelEvents;
+    //    use WithoutModelEvents;
 
     /**
      * Seed the application's database.
@@ -24,29 +25,28 @@ class DatabaseSeeder extends Seeder
         foreach ($permissions as $permission) {
             Permission::findOrCreate($permission);
         }
-        app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+        app()->make(PermissionRegistrar::class)->forgetCachedPermissions();
 
         $superadmin = Role::findOrCreate('superadmin');
         $eventAdmin = Role::findOrCreate('event_admin');
         $superadmin->syncPermissions($permissions);
 
-        app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+        app()->make(PermissionRegistrar::class)->forgetCachedPermissions();
 
         $admin = User::firstOrCreate(
             ['email' => 'admin@example.test'],
             [
                 'name' => 'Superadmin',
-                'password' => Hash::make('ChangeMe!2026')
+                'password' => Hash::make('ChangeMe!2026'),
             ]
         );
         $admin->assignRole($superadmin);
-
 
         $manager = User::firstOrCreate(
             ['email' => 'event-admin@example.test'],
             [
                 'name' => 'Event Admin',
-                'password' => Hash::make('ChangeMe!2026')
+                'password' => Hash::make('ChangeMe!2026'),
             ]
         );
         $manager->assignRole($eventAdmin);
@@ -56,7 +56,7 @@ class DatabaseSeeder extends Seeder
             [
                 'status' => 'active',
                 'welcome_title' => 'Witaj na wydarzeniu!',
-                'welcome_text' => 'Dodaj swoje najlepsze kadry.'
+                'welcome_text' => 'Dodaj swoje najlepsze kadry.',
             ]
         );
         $event->administrators()->syncWithoutDetaching([$manager->id]);

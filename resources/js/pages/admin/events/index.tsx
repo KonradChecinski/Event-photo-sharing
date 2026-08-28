@@ -28,7 +28,7 @@ type Event = {
 };
 export default function EventsIndex({ events }: { events: Event[] }) {
     const [dialog, setDialog] = useState(false);
-    const form = useForm({ name: '', description: '', status: 'draft' });
+    const form = useForm({ name: '', description: '', status: 'draft', welcome_image: null });
 
     return (
         <>
@@ -101,6 +101,15 @@ export default function EventsIndex({ events }: { events: Event[] }) {
                             value={form.data.description}
                             onChange={(e) =>
                                 form.setData('description', e.target.value)
+                            }
+                        />
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) =>
+                                form.setData('welcome_image',
+                                    e.target.files ? e.target.files[0] : null
+                                )
                             }
                         />
                     </Stack>

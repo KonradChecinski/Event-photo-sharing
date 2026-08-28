@@ -8,11 +8,12 @@ use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
 Route::get('/e/{event}', [GuestEventController::class, 'show'])->name('events.show');
+Route::get('/events/{event}/welcome', [GuestEventController::class, 'welcome'])->name('events.welcome');
 Route::post('/e/{event}/photos', [GuestPhotoController::class, 'store'])->middleware('throttle:guest-upload')->name('guest.photos.store');
 Route::delete('/e/{event}/photos/{photo}', [GuestPhotoController::class, 'destroy'])->middleware('throttle:guest-sensitive')->name('guest.photos.destroy');
-Route::get('/photos/{photo}/{variant}', [GuestPhotoController::class, 'file'])->whereIn('variant', ['thumbnail', 'preview', 'original'])->middleware('throttle:guest-sensitive')->name('guest.photos.file');
 Route::get('/photos/{photo}/thumbnail', [GuestPhotoController::class, 'file'])->defaults('variant', 'thumbnail')->name('guest.photos.thumbnail');
 Route::get('/photos/{photo}/preview', [GuestPhotoController::class, 'file'])->defaults('variant', 'preview')->name('guest.photos.preview');
+Route::get('/photos/{photo}/{variant}', [GuestPhotoController::class, 'file'])->whereIn('variant', ['thumbnail', 'preview', 'original'])->middleware('throttle:guest-sensitive')->name('guest.photos.file');
 
 Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(function (): void {
     Route::get('/', [AdminEventController::class, 'index'])->name('events.index');

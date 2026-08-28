@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
             'thumbnail_path' => 'events/test/thumbnails/photo.jpg',
             'preview_path' => 'events/test/previews/photo.jpg',
             'mime_type' => 'image/jpeg',
-            'file_size' => 100
+            'file_size' => 100,
         ];
     }
 }

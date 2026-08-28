@@ -4,7 +4,25 @@ import CloseIcon from '@mui/icons-material/Close';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
-import { Alert, Box, Button, Card, CardMedia, Container, CssBaseline, Dialog, Grid, IconButton, LinearProgress, Stack, ThemeProvider, Typography, createTheme } from '@mui/material';
+import {
+    Alert,
+    Box,
+    Button,
+    Card,
+    CardMedia,
+    Container,
+    CssBaseline,
+    Dialog,
+    Grid,
+    IconButton,
+    LinearProgress,
+    Stack,
+    ThemeProvider,
+    Typography,
+    createTheme,
+    ImageList,
+    ImageListItem,
+} from '@mui/material';
 import { motion, useReducedMotion } from 'motion/react';
 import { useRef, useState } from 'react';
 import { Keyboard, Navigation, Pagination, Zoom } from 'swiper/modules';
@@ -29,6 +47,9 @@ type PageProps = {
             secondary: string;
             text: string;
             background: string
+        };
+        images: {
+            welcome: string;
         }
     };
     photos: { data: Photo[] };
@@ -47,7 +68,7 @@ export default function EventShow({ event, photos }: PageProps) {
             background: { default: event.colors.background },
             text: { primary: event.colors.text },
         },
-        typography: { fontFamily: 'Inter, system-ui, sans-serif' },
+        typography: { fontFamily: 'CaveatBrush ,Inter, system-ui, sans-serif' },
     });
 
     function upload(files: FileList | null): void {
@@ -74,155 +95,425 @@ export default function EventShow({ event, photos }: PageProps) {
             <Head title={event.name} />
             <Box
                 sx={{
+                    display: 'flex',
+                    width: '100%',
                     minHeight: '100vh',
-                    py: { xs: 5, md: 8 },
-                    background: `radial-gradient(circle at 15% 15%, ${event.colors.secondary}55, transparent 35%), ${event.colors.background}`,
+                    backgroundColor: `${event.colors.background}dd`, // Główny, jasny kolor tła (pobrany ze serwera)
+                    backgroundImage: `url(${event.images.welcome})`,
+                    backgroundSize: 'contain',
+                    backgroundPosition: 'center top',
+                    backgroundRepeat: 'no-repeat',
+                    position: 'relative',
+                    // overflow: 'hidden',
+                    backgroundBlendMode: 'multiply',
                 }}
             >
-                <Container maxWidth="md">
-                    <Stack spacing={4}>
+                <Box
+                    sx={{
+                        // position: 'absolute',
+                        // top: 0,
+                        // left: 0,
+                        height: '100%',
+                        minHeight: '100vh',
+                        width: '100%',
+                        backgroundColor: `${event.colors.background}80`, // Główny, ciemny kolor tła (pobrany ze serwera)
+                    }}
+                >
+                    <Box
+                        sx={{
+                            width: '100%',
+                            height: '100%',
+                            minHeight: '100vh',
+                            background: `linear-gradient(180deg, ${event.colors.background}00 0%, ${event.colors.background} 360px, ${event.colors.background} 100%)`,
+                            opacity: 1,
+                        }}
+                    >
                         <Box
-                            component={motion.div}
-                            initial={
-                                reducedMotion ? false : { opacity: 0, y: 20 }
-                            }
-                            animate={{ opacity: 1, y: 0 }}
+                            sx={{
+                                position: 'relative',
+                                zIndex: 1,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                padding: 3,
+                            }}
                         >
-                            <Typography
-                                variant="h2"
-                                align={'center'}
-                                sx={{ fontWeight: 800 }}
-                            >
-                                {event.welcomeTitle}
-                            </Typography>
-                            <Typography
-                                variant="h6"
-                                align={'center'}
-                                sx={{ opacity: 0.85, maxWidth: 520 }}
-                            >
-                                {event.welcomeText}
-                            </Typography>
-                        </Box>
-
-                        {event.status === 'active' ? (
-                            <>
-                                <input
-                                    ref={picker}
-                                    hidden
-                                    multiple
-                                    accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
-                                    type="file"
-                                    onChange={(input) =>
-                                        upload(input.target.files)
-                                    }
-                                />
-                                <Button
-                                    size="large"
-                                    variant="contained"
-                                    startIcon={<AddPhotoAlternateIcon />}
-                                    onClick={() => picker.current?.click()}
-                                    sx={{
-                                        alignSelf: 'start',
-                                        borderRadius: 8,
-                                        px: 3,
-                                        py: 1.5,
-                                    }}
+                            {/* Twoja treść */}
+                            <Container maxWidth="lg">
+                                <Stack
+                                    spacing={4}
+                                    sx={{ alignItems: 'center' }}
                                 >
-                                    Dodaj zdjęcia
-                                </Button>
-                                {form.progress && (
-                                    <LinearProgress
-                                        variant="determinate"
-                                        value={form.progress.percentage}
-                                    />
-                                )}
-                            </>
-                        ) : (
-                            <Alert severity="info">
-                                To wydarzenie nie przyjmuje już nowych zdjęć.
-                            </Alert>
-                        )}
-
-                        <Typography variant="h5" fontWeight={700}>
-                            Twoje zdjęcia
-                        </Typography>
-                        <InfiniteScroll
-                            data="photos"
-                            buffer={300}
-                            loading={<LinearProgress />}
-                        >
-                            <Grid container spacing={1.5}>
-                                {photos.data.map((photo, index) => (
-                                    <Grid
-                                        key={photo.uuid}
-                                        size={{ xs: 6, sm: 4, md: 3 }}
-                                    >
-                                        <Card
-                                            component={motion.div}
-                                            whileHover={
-                                                reducedMotion
-                                                    ? undefined
-                                                    : { y: -4 }
-                                            }
+                                    <Box>
+                                        <Typography
+                                            variant="h4"
+                                            align={'center'}
+                                            sx={{ fontWeight: 800 }}
+                                        >
+                                            {event.welcomeTitle}
+                                        </Typography>
+                                        <Typography
+                                            variant="h4"
+                                            align={'center'}
                                             sx={{
-                                                position: 'relative',
-                                                borderRadius: 3,
+                                                opacity: 0.85,
+                                                maxWidth: 520,
                                             }}
                                         >
-                                            <CardMedia
-                                                component="img"
-                                                image={photo.thumbnail}
-                                                loading="lazy"
+                                            {event.welcomeText}
+                                        </Typography>
+                                    </Box>
+
+                                    {event.status === 'active' ? (
+                                        <>
+                                            <input
+                                                ref={picker}
+                                                hidden
+                                                multiple
+                                                accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+                                                type="file"
+                                                onChange={(input) =>
+                                                    upload(input.target.files)
+                                                }
+                                            />
+                                            <Button
+                                                size="large"
+                                                variant="contained"
+                                                startIcon={
+                                                    <AddPhotoAlternateIcon />
+                                                }
                                                 onClick={() =>
-                                                    setActiveIndex(index)
+                                                    picker.current?.click()
                                                 }
                                                 sx={{
-                                                    aspectRatio: 1,
-                                                    cursor: 'zoom-in',
-                                                    objectFit: 'cover',
-                                                }}
-                                            />
-                                            <IconButton
-                                                aria-label="Usuń zdjęcie"
-                                                onClick={() => {
-                                                    if (
-                                                        confirm(
-                                                            'Usunąć zdjęcie z Twojej galerii?',
-                                                        )
-                                                    )
-                                                        router.delete(
-                                                            destroy({
-                                                                event,
-                                                                photo,
-                                                            }).url,
-                                                            {
-                                                                preserveScroll: true,
-                                                            },
-                                                        );
-                                                }}
-                                                sx={{
-                                                    position: 'absolute',
-                                                    right: 4,
-                                                    bottom: 4,
-                                                    bgcolor: 'rgba(0,0,0,.55)',
-                                                    color: 'white',
+                                                    alignSelf: 'center',
+                                                    borderRadius: 8,
+                                                    px: 3,
+                                                    py: 1.5,
                                                 }}
                                             >
-                                                <DeleteOutlineIcon />
-                                            </IconButton>
-                                        </Card>
-                                    </Grid>
-                                ))}
-                            </Grid>
-                        </InfiniteScroll>
-                        {!photos.data.length && (
-                            <Typography sx={{ opacity: 0.8 }}>
-                                Nie masz jeszcze żadnych zdjęć.
-                            </Typography>
-                        )}
-                    </Stack>
-                </Container>
+                                                Dodaj zdjęcia
+                                            </Button>
+                                            {form.progress && (
+                                                <LinearProgress
+                                                    variant="determinate"
+                                                    value={
+                                                        form.progress.percentage
+                                                    }
+                                                />
+                                            )}
+                                        </>
+                                    ) : (
+                                        <Alert severity="info">
+                                            To wydarzenie nie przyjmuje już
+                                            nowych zdjęć.
+                                        </Alert>
+                                    )}
+
+                                    <Typography
+                                        variant="h5"
+                                        sx={{ fontWeight: 700 }}
+                                    >
+                                        Twoje zdjęcia
+                                    </Typography>
+                                    <InfiniteScroll
+                                        data="photos"
+                                        buffer={300}
+                                        loading={<LinearProgress />}
+                                        style={{ marginTop: '0px' }}
+                                    >
+                                        <ImageList
+                                            variant="masonry"
+                                            cols={2}
+                                            gap={8}
+                                            sx={{ marginTop: '0px' }}
+                                        >
+                                            {photos.data.map((photo, index) => (
+                                                <ImageListItem
+                                                    key={photo.uuid}
+                                                    component={motion.div}
+                                                    whileHover={
+                                                        reducedMotion
+                                                            ? undefined
+                                                            : { y: -4 }
+                                                    }
+                                                    sx={{
+                                                        position: 'relative',
+                                                        borderRadius: 3,
+                                                    }}
+                                                >
+                                                    <Box
+                                                        component={'img'}
+                                                        src={photo.thumbnail}
+                                                        alt="Zdjęcie z wydarzenia"
+                                                        loading="lazy"
+                                                        onClick={() =>
+                                                            setActiveIndex(
+                                                                index,
+                                                            )
+                                                        }
+                                                        sx={{
+                                                            cursor: 'zoom-in',
+                                                            borderRadius: 3,
+                                                        }}
+                                                    />
+                                                    <IconButton
+                                                        aria-label="Usuń zdjęcie"
+                                                        onClick={() => {
+                                                            // if (
+                                                            //     confirm(
+                                                            //         'Usunąć zdjęcie z Twojej galerii?',
+                                                            //     )
+                                                            // )
+                                                            router.delete(
+                                                                destroy({
+                                                                    event,
+                                                                    photo,
+                                                                }).url,
+                                                                {
+                                                                    preserveScroll: true,
+                                                                },
+                                                            );
+                                                        }}
+                                                        sx={{
+                                                            position:
+                                                                'absolute',
+                                                            right: 4,
+                                                            bottom: 4,
+                                                            bgcolor:
+                                                                'rgba(0,0,0,.55)',
+                                                            color: 'white',
+                                                        }}
+                                                    >
+                                                        <DeleteOutlineIcon />
+                                                    </IconButton>
+                                                </ImageListItem>
+                                            ))}
+                                        </ImageList>
+                                    </InfiniteScroll>
+                                    {!photos.data.length && (
+                                        <Typography sx={{ opacity: 0.8 }}>
+                                            Nie masz jeszcze żadnych zdjęć.
+                                        </Typography>
+                                    )}
+                                </Stack>
+                            </Container>
+                        </Box>
+                    </Box>
+                </Box>
             </Box>
+
+            {/*to koniec*/}
+            {/*<Box*/}
+            {/*    sx={{*/}
+            {/*        minHeight: '100vh',*/}
+            {/*        py: { xs: 5, md: 8 },*/}
+            {/*        background: `radial-gradient(circle at 15% 15%, ${event.colors.secondary}55, transparent 35%), ${event.colors.background}`,*/}
+            {/*    }}*/}
+            {/*>*/}
+            {/*    <Container maxWidth="md">*/}
+            {/*        <Stack spacing={4}>*/}
+            {/*            <Box*/}
+            {/*                component={motion.div}*/}
+            {/*                initial={*/}
+            {/*                    reducedMotion ? false : { opacity: 0, y: 20 }*/}
+            {/*                }*/}
+            {/*                animate={{ opacity: 1, y: 0 }}*/}
+            {/*            >*/}
+            {/*                <Typography*/}
+            {/*                    variant="h2"*/}
+            {/*                    align={'center'}*/}
+            {/*                    sx={{ fontWeight: 800 }}*/}
+            {/*                >*/}
+            {/*                    {event.welcomeTitle}*/}
+            {/*                </Typography>*/}
+            {/*                <Typography*/}
+            {/*                    variant="h6"*/}
+            {/*                    align={'center'}*/}
+            {/*                    sx={{ opacity: 0.85, maxWidth: 520 }}*/}
+            {/*                >*/}
+            {/*                    {event.welcomeText}*/}
+            {/*                </Typography>*/}
+            {/*            </Box>*/}
+
+            {/*            {event.status === 'active' ? (*/}
+            {/*                <>*/}
+            {/*                    <input*/}
+            {/*                        ref={picker}*/}
+            {/*                        hidden*/}
+            {/*                        multiple*/}
+            {/*                        accept="image/jpeg,image/png,image/webp,image/heic,image/heif"*/}
+            {/*                        type="file"*/}
+            {/*                        onChange={(input) =>*/}
+            {/*                            upload(input.target.files)*/}
+            {/*                        }*/}
+            {/*                    />*/}
+            {/*                    <Button*/}
+            {/*                        size="large"*/}
+            {/*                        variant="contained"*/}
+            {/*                        startIcon={<AddPhotoAlternateIcon />}*/}
+            {/*                        onClick={() => picker.current?.click()}*/}
+            {/*                        sx={{*/}
+            {/*                            alignSelf: 'start',*/}
+            {/*                            borderRadius: 8,*/}
+            {/*                            px: 3,*/}
+            {/*                            py: 1.5,*/}
+            {/*                        }}*/}
+            {/*                    >*/}
+            {/*                        Dodaj zdjęcia*/}
+            {/*                    </Button>*/}
+            {/*                    {form.progress && (*/}
+            {/*                        <LinearProgress*/}
+            {/*                            variant="determinate"*/}
+            {/*                            value={form.progress.percentage}*/}
+            {/*                        />*/}
+            {/*                    )}*/}
+            {/*                </>*/}
+            {/*            ) : (*/}
+            {/*                <Alert severity="info">*/}
+            {/*                    To wydarzenie nie przyjmuje już nowych zdjęć.*/}
+            {/*                </Alert>*/}
+            {/*            )}*/}
+
+            {/*            <Typography variant="h5" fontWeight={700}>*/}
+            {/*                Twoje zdjęcia*/}
+            {/*            </Typography>*/}
+            {/*            <InfiniteScroll*/}
+            {/*                data="photos"*/}
+            {/*                buffer={300}*/}
+            {/*                loading={<LinearProgress />}*/}
+            {/*            >*/}
+            {/*                <ImageList variant="masonry" cols={2} gap={8}>*/}
+            {/*                    {photos.data.map((photo, index) => (*/}
+            {/*                        <ImageListItem*/}
+            {/*                            key={photo.uuid}*/}
+            {/*                            component={motion.div}*/}
+            {/*                            whileHover={*/}
+            {/*                                reducedMotion*/}
+            {/*                                    ? undefined*/}
+            {/*                                    : { y: -4 }*/}
+            {/*                            }*/}
+            {/*                            sx={{*/}
+            {/*                                position: 'relative',*/}
+            {/*                                borderRadius: 3,*/}
+            {/*                            }}*/}
+            {/*                        >*/}
+            {/*                            <Box*/}
+            {/*                                component={'img'}*/}
+            {/*                                src={photo.thumbnail}*/}
+            {/*                                alt="Zdjęcie z wydarzenia"*/}
+            {/*                                loading="lazy"*/}
+            {/*                                onClick={() =>*/}
+            {/*                                    setActiveIndex(index)*/}
+            {/*                                }*/}
+            {/*                                sx={{*/}
+            {/*                                    cursor: 'zoom-in',*/}
+            {/*                                    borderRadius: 3,*/}
+            {/*                                }}*/}
+            {/*                            />*/}
+            {/*                            <IconButton*/}
+            {/*                                aria-label="Usuń zdjęcie"*/}
+            {/*                                onClick={() => {*/}
+            {/*                                    // if (*/}
+            {/*                                    //     confirm(*/}
+            {/*                                    //         'Usunąć zdjęcie z Twojej galerii?',*/}
+            {/*                                    //     )*/}
+            {/*                                    // )*/}
+            {/*                                    router.delete(*/}
+            {/*                                        destroy({*/}
+            {/*                                            event,*/}
+            {/*                                            photo,*/}
+            {/*                                        }).url,*/}
+            {/*                                        {*/}
+            {/*                                            preserveScroll: true,*/}
+            {/*                                        },*/}
+            {/*                                    );*/}
+            {/*                                }}*/}
+            {/*                                sx={{*/}
+            {/*                                    position: 'absolute',*/}
+            {/*                                    right: 4,*/}
+            {/*                                    bottom: 4,*/}
+            {/*                                    bgcolor: 'rgba(0,0,0,.55)',*/}
+            {/*                                    color: 'white',*/}
+            {/*                                }}*/}
+            {/*                            >*/}
+            {/*                                <DeleteOutlineIcon />*/}
+            {/*                            </IconButton>*/}
+            {/*                        </ImageListItem>*/}
+            {/*                    ))}*/}
+            {/*                </ImageList>*/}
+            {/*                /!*<Grid container spacing={1.5}>*!/*/}
+            {/*                /!*    {photos.data.map((photo, index) => (*!/*/}
+            {/*                /!*        <Grid*!/*/}
+            {/*                /!*            key={photo.uuid}*!/*/}
+            {/*                /!*            size={{ xs: 6, sm: 4, md: 3 }}*!/*/}
+            {/*                /!*        >*!/*/}
+            {/*                /!*            <Card*!/*/}
+            {/*                /!*                component={motion.div}*!/*/}
+            {/*                /!*                whileHover={*!/*/}
+            {/*                /!*                    reducedMotion*!/*/}
+            {/*                /!*                        ? undefined*!/*/}
+            {/*                /!*                        : { y: -4 }*!/*/}
+            {/*                /!*                }*!/*/}
+            {/*                /!*                sx={{*!/*/}
+            {/*                /!*                    position: 'relative',*!/*/}
+            {/*                /!*                    borderRadius: 3,*!/*/}
+            {/*                /!*                }}*!/*/}
+            {/*                /!*            >*!/*/}
+            {/*                /!*                <CardMedia*!/*/}
+            {/*                /!*                    component="img"*!/*/}
+            {/*                /!*                    image={photo.thumbnail}*!/*/}
+            {/*                /!*                    loading="lazy"*!/*/}
+            {/*                /!*                    onClick={() =>*!/*/}
+            {/*                /!*                        setActiveIndex(index)*!/*/}
+            {/*                /!*                    }*!/*/}
+            {/*                /!*                    sx={{*!/*/}
+            {/*                /!*                        aspectRatio: 1,*!/*/}
+            {/*                /!*                        cursor: 'zoom-in',*!/*/}
+            {/*                /!*                        objectFit: 'cover',*!/*/}
+            {/*                /!*                    }}*!/*/}
+            {/*                /!*                />*!/*/}
+            {/*                /!*                <IconButton*!/*/}
+            {/*                /!*                    aria-label="Usuń zdjęcie"*!/*/}
+            {/*                /!*                    onClick={() => {*!/*/}
+            {/*                /!*                        if (*!/*/}
+            {/*                /!*                            confirm(*!/*/}
+            {/*                /!*                                'Usunąć zdjęcie z Twojej galerii?',*!/*/}
+            {/*                /!*                            )*!/*/}
+            {/*                /!*                        )*!/*/}
+            {/*                /!*                            router.delete(*!/*/}
+            {/*                /!*                                destroy({*!/*/}
+            {/*                /!*                                    event,*!/*/}
+            {/*                /!*                                    photo,*!/*/}
+            {/*                /!*                                }).url,*!/*/}
+            {/*                /!*                                {*!/*/}
+            {/*                /!*                                    preserveScroll: true,*!/*/}
+            {/*                /!*                                },*!/*/}
+            {/*                /!*                            );*!/*/}
+            {/*                /!*                    }}*!/*/}
+            {/*                /!*                    sx={{*!/*/}
+            {/*                /!*                        position: 'absolute',*!/*/}
+            {/*                /!*                        right: 4,*!/*/}
+            {/*                /!*                        bottom: 4,*!/*/}
+            {/*                /!*                        bgcolor: 'rgba(0,0,0,.55)',*!/*/}
+            {/*                /!*                        color: 'white',*!/*/}
+            {/*                /!*                    }}*!/*/}
+            {/*                /!*                >*!/*/}
+            {/*                /!*                    <DeleteOutlineIcon />*!/*/}
+            {/*                /!*                </IconButton>*!/*/}
+            {/*                /!*            </Card>*!/*/}
+            {/*                /!*        </Grid>*!/*/}
+            {/*                /!*    ))}*!/*/}
+            {/*                /!*</Grid>*!/*/}
+            {/*            </InfiniteScroll>*/}
+            {/*            {!photos.data.length && (*/}
+            {/*                <Typography sx={{ opacity: 0.8 }}>*/}
+            {/*                    Nie masz jeszcze żadnych zdjęć.*/}
+            {/*                </Typography>*/}
+            {/*            )}*/}
+            {/*        </Stack>*/}
+            {/*    </Container>*/}
+            {/*</Box>*/}
 
             <Dialog
                 open={activeIndex !== null}
