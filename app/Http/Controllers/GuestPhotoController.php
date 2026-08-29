@@ -16,6 +16,7 @@ class GuestPhotoController extends Controller
     {
         [$guest,$cookie] = $identity->resolve($request, $event);
         $photos = [];
+
         foreach ($request->validated('photos') as $file) {
             try {
                 $photos[] = $storage->store($guest->load('event'), $file)->uuid;

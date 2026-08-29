@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Symfony\Component\HttpFoundation\Response;
+use function Laravel\Prompts\title;
 
 class GuestEventController extends Controller
 {
@@ -23,19 +24,18 @@ class GuestEventController extends Controller
                 'uuid' => $event->uuid,
                 'name' => $event->name,
                 'status' => $event->status,
+                'title' => $event->title ?: 'Witaj!',
+                'text' => $event->text ?: 'Pokażcie nam jak bawicie się na naszym weselu!',
                 'welcomeTitle' => $event->welcome_title ?: 'Witaj!',
                 'welcomeText' => $event->welcome_text ?: 'Podziel się zdjęciami z tego wyjątkowego wydarzenia.',
                 'colors' => [
                     'primary' => $event->primary_color,
                     'secondary' => $event->secondary_color,
                     'text' => $event->text_color,
-                    'background' => $event->background_color,
+                    'background_primary' => $event->background_color_primary,
+                    'background_secondary' => $event->background_color_secondary,
                 ],
-                'images' => [
-//                    'hero' => $event->hero_image ? route('events.hero', $event) : null,
-                    'welcome' => $event->welcome_image ? route('events.welcome', $event) : null,
-//                    'logo' => $event->logo ? route('events.logo', $event) : null,
-                ],
+                'image' =>  $event->image ? route('events.welcome', $event) : null,
             ],
             'photos' => Inertia::scroll(
                 $guest->photos()
@@ -73,10 +73,10 @@ class GuestEventController extends Controller
         [$guest, $cookie] = $identity->resolve($request, $event);
 
         // ensure we have a welcome image path
-        abort_unless($event->welcome_image, 404);
+        abort_unless($event->image, 404);
 
         $disk = Storage::disk(config('filesystems.default'));
-        $path = $event->welcome_image;
+        $path = $event->image;
 
         abort_unless($disk->exists($path), 404);
 

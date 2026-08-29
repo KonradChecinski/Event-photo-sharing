@@ -14,7 +14,7 @@ class StoreGuestPhotosRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'photos' => ['required', 'array', 'max:50'],
+            'photos' => ['required', 'array', 'max:20'],
             'photos.*' => [
                 'required',
                 'file',

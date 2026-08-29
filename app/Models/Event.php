@@ -20,15 +20,16 @@ class Event extends Model
         'status',
         'starts_at',
         'ends_at',
+        'title',
+        'text',
         'welcome_title',
         'welcome_text',
-        'hero_image',
-        'welcome_image',
-        'logo',
+        'image',
         'primary_color',
         'secondary_color',
         'text_color',
-        'background_color',
+        'background_color_primary',
+        'background_color_secondary',
     ];
 
     //    protected $hidden = ['uuid', 'slug'];
@@ -38,7 +39,8 @@ class Event extends Model
         'primary_color' => '#6D28D9',
         'secondary_color' => '#EC4899',
         'text_color' => '#FFFFFF',
-        'background_color' => '#1E1B4B',
+        'background_color_primary' => '#1E1B4B',
+        'background_color_secondary' => '#2D3748',
     ];
 
     protected function casts(): array
