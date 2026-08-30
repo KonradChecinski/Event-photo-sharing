@@ -1,6 +1,6 @@
 FROM php:8.5-fpm
 
-# 1. Instalacja Node.js (v20) oraz bibliotek bazowych dla HEIF/HEIC
+# Instalacja Node.js (v20) i bibliotek systemowych (w tym HEIF)
 RUN apt-get update && apt-get install -y \
     libheif-dev \
     heif-gdk-pixbuf \
@@ -11,12 +11,10 @@ RUN apt-get update && apt-get install -y \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-# 2. Pobranie niezawodnego instalatora rozszerzeń PHP (Standard Branżowy)
+# Pobranie instalatora rozszerzeń
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 
-# 3. Instalacja WSZYSTKICH wymaganych rozszerzeń i Composera jednym poleceniem!
-# Narzędzie to samo pobierze libpng-dev, libjpeg-dev, libmagickwand-dev,
-# skonfiguruje GD pod Freetype/JPEG, zbuduje Imagick i włączy Opcache.
+# Instalacja rozszerzeń PHP
 RUN install-php-extensions \
     pdo_mysql \
     zip \
@@ -27,8 +25,6 @@ RUN install-php-extensions \
 
 WORKDIR /var/www
 
-# Wystawiamy port 8000 dla Twojego Nginx Proxy Managera
-EXPOSE 8000
-
-# Uruchamiamy serwer HTTP wbudowany w Laravela
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+# Wewnętrzny port PHP-FPM
+EXPOSE 9000
+CMD ["php-fpm"]
