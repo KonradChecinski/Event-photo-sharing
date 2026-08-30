@@ -30,13 +30,14 @@ services:
         image: mysql:8.0
         container_name: laravel_db
         restart: unless-stopped
-        env_file: .env
+        command: --default-authentication-plugin=mysql_native_password # <--- TA LINIJKA (Naprawia problem z logowaniem PHP)
+        env_file:
+            - .env # <--- TA LINIJKA (Gwarantuje, że Docker użyje pliku .env)
         environment:
             MYSQL_DATABASE: ${DB_DATABASE}
             MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
             MYSQL_USER: ${DB_USERNAME}
             MYSQL_PASSWORD: ${DB_PASSWORD}
-        command: --default-authentication-plugin=mysql_native_password
         volumes:
             - dbdata:/var/lib/mysql
         ports:
