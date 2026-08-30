@@ -1,0 +1,53 @@
+services:
+    app:
+        build:
+            context: .
+            dockerfile: docker/php/Dockerfile
+        container_name: laravel_app
+        restart: unless-stopped
+        ports:
+            - "8000:8000"
+        volumes:
+            - .:/var/www
+            - ./docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini
+        networks:
+            - laravel_network
+
+    db:
+        image: mysql:8.0
+        container_name: laravel_db
+        restart: unless-stopped
+        environment:
+            MYSQL_DATABASE: ${DB_DATABASE}
+            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+            MYSQL_USER: ${DB_USERNAME}
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+        volumes:
+            - dbdata:/var/lib/mysql
+        ports:
+            - "3306:3306"
+        networks:
+            - laravel_network
+
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        container_name: laravel_phpmyadmin
+        restart: unless-stopped
+        environment:
+            PMA_HOST: db
+            PMA_ARBITRARY: 0
+            UPLOAD_LIMIT: 64M
+        ports:
+            - "8080:80"
+        depends_on:
+            - db
+        networks:
+            - laravel_network
+
+networks:
+    laravel_network:
+        driver: bridge
+
+volumes:
+    dbdata:
+        driver: local
