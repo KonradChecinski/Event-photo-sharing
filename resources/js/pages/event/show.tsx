@@ -69,7 +69,7 @@ export default function EventShow({ event, photos }: PageProps) {
         palette: {
             primary: { main: event.colors.primary },
             secondary: { main: event.colors.secondary },
-            background: { default: event.colors.background_primary },
+            background: { default: event.colors.background_primary, paper: event.colors.background_secondary },
             text: { primary: event.colors.text },
         },
         typography: { fontFamily: 'CaveatBrush ,Inter, system-ui, sans-serif' },
@@ -505,8 +505,9 @@ export default function EventShow({ event, photos }: PageProps) {
                 slotProps={{
                     paper: {
                         sx: {
-                            bgcolor: '#050505',
-                            overflow: 'hidden'
+                            // bgcolor: '#050505',
+                            overflow: 'hidden',
+                            borderRadius: 3,
                         }
                     }
                 }}
@@ -545,6 +546,7 @@ export default function EventShow({ event, photos }: PageProps) {
                         key={`${activeIndex}-${photos.data.length}`}
                         initialSlide={activeIndex}
                         modules={[Keyboard, Navigation, Pagination, Zoom]}
+                        // loop={true}
                         navigation
                         pagination={{ type: 'fraction' }}
                         keyboard={{ enabled: true }}
@@ -580,7 +582,7 @@ export default function EventShow({ event, photos }: PageProps) {
                     slotProps={{
                         paper: {
                             sx: {
-                                bgcolor: '#050505',
+                                // bgcolor: '#050505',
                                 overflow: 'hidden',
                                 borderRadius: 3,
                             }
