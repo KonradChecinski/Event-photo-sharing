@@ -1,13 +1,13 @@
 FROM php:8.5-fpm
 
-# Instalacja Node.js (v20) i bibliotek systemowych (w tym HEIF)
+# Instalacja Node.js (v22) i bibliotek systemowych (w tym HEIF)
 RUN apt-get update && apt-get install -y \
     libheif-dev \
     heif-gdk-pixbuf \
     git \
     unzip \
     curl \
-    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
