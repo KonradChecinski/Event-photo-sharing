@@ -4,6 +4,7 @@ services:
             context: .
             dockerfile: docker/php/Dockerfile
         container_name: laravel_app
+        shm_size: '1gb'
         restart: unless-stopped
         volumes:
             - .:/var/www
