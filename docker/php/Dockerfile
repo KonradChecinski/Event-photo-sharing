@@ -1,33 +1,34 @@
 FROM php:8.5-fpm
 
-# Instalacja zależności systemowych, w tym bibliotek pod Imagick (z obsługą formatów HEIF/HEIC z urządzeń Apple)
+# 1. Instalacja Node.js (v20) oraz bibliotek bazowych dla HEIF/HEIC
 RUN apt-get update && apt-get install -y \
-    libpng-dev \
-    libjpeg-dev \
-    libfreetype6-dev \
-    libzip-dev \
-    libmagickwand-dev \
     libheif-dev \
     heif-gdk-pixbuf \
-    unzip \
     git \
+    unzip \
     curl \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-# Instalacja Node.js (v20) do budowania assetów React/Vite wewnątrz kontenera
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs
+# 2. Pobranie niezawodnego instalatora rozszerzeń PHP (Standard Branżowy)
+COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 
-# Instalacja i włączenie rozszerzeń PHP (Imagick, GD, PDO MySQL, Zip, OPcache)
-RUN pecl install imagick \
-    && docker-php-ext-enable imagick \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo_mysql gd zip opcache
-
-# Instalacja Composera
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# 3. Instalacja WSZYSTKICH wymaganych rozszerzeń i Composera jednym poleceniem!
+# Narzędzie to samo pobierze libpng-dev, libjpeg-dev, libmagickwand-dev,
+# skonfiguruje GD pod Freetype/JPEG, zbuduje Imagick i włączy Opcache.
+RUN install-php-extensions \
+    pdo_mysql \
+    zip \
+    opcache \
+    gd \
+    imagick \
+    @composer
 
 WORKDIR /var/www
 
+# Wystawiamy port 8000 dla Twojego Nginx Proxy Managera
 EXPOSE 8000
+
+# Uruchamiamy serwer HTTP wbudowany w Laravela
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
