@@ -27,11 +27,16 @@ class EventController extends Controller
     public function store(StoreEventRequest $request): RedirectResponse
     {
         $data = $request->validated();
-        $file = $request->file('welcome_image');
+        $file = $request->file('image');
+
+        // defensive: if validated data contains image but no uploaded file, remove it so we don't overwrite DB
+        if (! $file && array_key_exists('image', $data)) {
+            unset($data['image']);
+        }
 
         // remove file from mass-assigned data as it needs special handling
         if ($file) {
-            unset($data['welcome_image']);
+            unset($data['image']);
         }
 
         $event = Event::create($data);
@@ -39,7 +44,7 @@ class EventController extends Controller
         if ($file) {
             $extension = Str::lower($file->guessExtension() ?: $file->extension());
             $path = $file->storeAs('events/'.$event->uuid.'/settings_images', Str::uuid().'.'.$extension, config('filesystems.default'));
-            $event->update(['welcome_image' => $path]);
+            $event->update(['image' => $path]);
         }
 
         return to_route('admin.events.index')->with('success', 'Wydarzenie utworzone.');
@@ -58,6 +63,7 @@ class EventController extends Controller
                     'deletedPhotos' => $event->photos()->whereNotNull('deleted_at')->count(),
                 ],
                 'eventUrl' => route('events.show', $event),
+                'backgroundUrl' => route('events.background', $event),
             ]
         );
     }
@@ -65,12 +71,18 @@ class EventController extends Controller
     public function update(UpdateEventAppearanceRequest $request, Event $event): RedirectResponse
     {
         $data = $request->validated();
+        $file = $request->file('image');
 
-        if ($request->hasFile('welcome_image')) {
-            $file = $request->file('welcome_image');
+        // defensive: if validated data contains image but no uploaded file, remove it so we don't overwrite DB
+        if (! $file && array_key_exists('image', $data)) {
+            unset($data['image']);
+        }
+
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
             $extension = Str::lower($file->guessExtension() ?: $file->extension());
             $path = $file->storeAs('events/'.$event->uuid.'/settings_images', Str::uuid().'.'.$extension, config('filesystems.default'));
-            $data['welcome_image'] = $path;
+            $data['image'] = $path;
         }
 
         $event->update($data);

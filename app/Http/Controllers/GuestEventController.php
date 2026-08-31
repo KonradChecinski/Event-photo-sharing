@@ -35,7 +35,7 @@ class GuestEventController extends Controller
                     'background_primary' => $event->background_color_primary,
                     'background_secondary' => $event->background_color_secondary,
                 ],
-                'image' =>  $event->image ? route('events.welcome', $event) : null,
+                'image' =>  $event->image ? route('events.background', $event) : null,
             ],
             'photos' => Inertia::scroll(
                 $guest->photos()
@@ -64,10 +64,11 @@ class GuestEventController extends Controller
         ];
     }
 
-    public function welcome(Request $request, Event $event, EventGuestIdentity $identity)
+    public function background(Request $request, Event $event, EventGuestIdentity $identity)
     {
+//        dd($event);
         // ensure the event is visible to guests
-        abort_unless($event->status !== 'draft', 404);
+//        abort_unless($event->status !== 'draft', 404);
 
         // resolve guest identity (ensures access and may set a cookie)
         [$guest, $cookie] = $identity->resolve($request, $event);

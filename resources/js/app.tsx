@@ -6,6 +6,9 @@ import AppLayout from '@/layouts/app-layout';
 import AuthLayout from '@/layouts/auth-layout';
 import EventsLayout from '@/layouts/events/layout';
 import SettingsLayout from '@/layouts/settings/layout';
+import { SnackbarProvider } from 'notistack';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -30,8 +33,12 @@ createInertiaApp({
     withApp(app) {
         return (
             <TooltipProvider delayDuration={0}>
-                {app}
-                <Toaster />
+                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={'pl'}>
+                    <SnackbarProvider>
+                        {app}
+                        <Toaster />
+                    </SnackbarProvider>
+                </LocalizationProvider>
             </TooltipProvider>
         );
     },

@@ -28,7 +28,7 @@ type Event = {
 };
 export default function EventsIndex({ events }: { events: Event[] }) {
     const [dialog, setDialog] = useState(false);
-    const form = useForm({ name: '', description: '', status: 'draft', welcome_image: null });
+    const form = useForm({ name: '', description: '', status: 'draft', image: null });
 
     return (
         <>
@@ -107,7 +107,7 @@ export default function EventsIndex({ events }: { events: Event[] }) {
                             type="file"
                             accept="image/*"
                             onChange={(e) =>
-                                form.setData('welcome_image',
+                                form.setData('image',
                                     e.target.files ? e.target.files[0] : null
                                 )
                             }
@@ -120,6 +120,7 @@ export default function EventsIndex({ events }: { events: Event[] }) {
                         variant="contained"
                         onClick={() =>
                             form.post(store().url, {
+                                forceFormData: true,
                                 onSuccess: () => setDialog(false),
                             })
                         }
