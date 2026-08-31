@@ -1,5 +1,5 @@
 Write-Host "1. Pobieranie nowosci z GitHuba..." -ForegroundColor Cyan
-git pull origin main
+git pull
 
 Write-Host "2. Aktualizacja pakietow PHP (w Dockerze)..." -ForegroundColor Cyan
 docker compose exec app composer install --optimize-autoloader --no-dev
