@@ -53,6 +53,12 @@ type PageProps = {
             background_secondary: string;
         };
         image:  string;
+
+        startsAt: Date;
+        endsAt: Date;
+        showPhotos: boolean;
+        canUpload: boolean;
+        isAdminViewing: boolean;
     };
     photos: { data: Photo[] };
 };
@@ -366,127 +372,120 @@ export default function EventShow({ event, photos }: PageProps) {
                                         </Typography>
                                     </Box>
 
-                                    {event.status === 'active' ? (
+                                    {/* Upload controls and messages */}
+                                    {event.status === 'finished' && !event.isAdminViewing ? (
+                                        <Alert severity="info">To wydarzenie zostało zakończone. Zdjęcia nie są już widoczne.</Alert>
+                                    ) : (
                                         <>
-                                            <input
-                                                ref={picker}
-                                                hidden
-                                                multiple
-                                                accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif"
-                                                type="file"
-                                                onChange={(input) =>
-                                                    upload(input.target.files)
-                                                }
-                                            />
-                                            <Button
-                                                size="large"
-                                                variant="contained"
-                                                startIcon={
-                                                    <AddPhotoAlternateIcon />
-                                                }
-                                                onClick={() =>
-                                                    picker.current?.click()
-                                                }
-                                                sx={{
-                                                    alignSelf: 'center',
-                                                    borderRadius: 8,
-                                                    px: 3,
-                                                    py: 1.5,
-                                                }}
-                                            >
-                                                Dodaj zdjęcia
-                                            </Button>
+                                            {event.canUpload ? (
+                                                <>
+                                                    <input
+                                                        ref={picker}
+                                                        hidden
+                                                        multiple
+                                                        accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif"
+                                                        type="file"
+                                                        onChange={(input) =>
+                                                            upload(input.target.files)
+                                                        }
+                                                    />
+                                                    <Button
+                                                        size="large"
+                                                        variant="contained"
+                                                        startIcon={<AddPhotoAlternateIcon />}
+                                                        onClick={() => picker.current?.click()}
+                                                        sx={{ alignSelf: 'center', borderRadius: 8, px: 3, py: 1.5 }}
+                                                    >
+                                                        Dodaj zdjęcia
+                                                    </Button>
+                                                </>
+                                            ) : (
+                                                // not allowed to upload
+                                                event.status === 'inactive' ? (
+                                                    <Alert severity="info">Wysyłanie zdjęć jest teraz wyłączone.</Alert>
+                                                ) : event.status === 'active' ? (
+                                                    // active but outside date range
+                                                    <Alert severity="info">Wysyłanie zdjęć jest dostępne tylko w godzinach wydarzenia.</Alert>
+                                                ) : (
+                                                    <Alert severity="info">To wydarzenie nie przyjmuje nowych zdjęć.</Alert>
+                                                )
+                                            )}
+
                                             {uploadError && (
                                                 <Alert severity="error" sx={{ mt: 2 }}>
                                                     {uploadError}
                                                 </Alert>
                                             )}
                                             {form.progress && (
-                                                <LinearProgress
-                                                    variant="determinate"
-                                                    value={
-                                                        form.progress.percentage
-                                                    }
-                                                />
+                                                <LinearProgress variant="determinate" value={form.progress.percentage} />
+                                            )}
+                                        </>
+                                    )}
+
+                                    {event.showPhotos ? (
+                                        <>
+                                            <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                                                Twoje zdjęcia
+                                            </Typography>
+                                            <InfiniteScroll data="photos" buffer={300} loading={<LinearProgress />} style={{ marginTop: '0px' }}>
+                                                <ImageList variant="masonry" cols={2} gap={8} sx={{ marginTop: '0px' }}>
+                                                    {photos.data.map((photo, index) => (
+                                                        <ImageListItem
+                                                            key={photo.uuid}
+                                                            component={motion.div}
+                                                            whileHover={
+                                                                reducedMotion
+                                                                    ? undefined
+                                                                    : { y: -4 }
+                                                            }
+                                                            sx={{
+                                                                position: 'relative',
+                                                                borderRadius: 3,
+                                                            }}
+                                                        >
+                                                            <Box
+                                                                component={'img'}
+                                                                src={photo.thumbnail}
+                                                                alt="Zdjęcie z wydarzenia"
+                                                                loading="lazy"
+                                                                onClick={() =>
+                                                                    setActiveIndex(
+                                                                        index,
+                                                                    )
+                                                                }
+                                                                sx={{
+                                                                    cursor: 'zoom-in',
+                                                                    borderRadius: 3,
+                                                                }}
+                                                            />
+                                                            <IconButton
+                                                                aria-label="Usuń zdjęcie"
+                                                                onClick={() => setPhotoToDelete(photo)}
+                                                                sx={{
+                                                                    position:
+                                                                        'absolute',
+                                                                    right: 4,
+                                                                    bottom: 4,
+                                                                    bgcolor:
+                                                                        'rgba(0,0,0,.55)',
+                                                                    color: 'white',
+                                                                }}
+                                                            >
+                                                                <DeleteOutlineIcon />
+                                                            </IconButton>
+                                                        </ImageListItem>
+                                                    ))}
+                                                </ImageList>
+                                            </InfiniteScroll>
+
+                                            {!photos.data.length && (
+                                                <Typography sx={{ opacity: 0.8 }}>
+                                                    Nie masz jeszcze żadnych zdjęć.
+                                                </Typography>
                                             )}
                                         </>
                                     ) : (
-                                        <Alert severity="info">
-                                            To wydarzenie nie przyjmuje już
-                                            nowych zdjęć.
-                                        </Alert>
-                                    )}
-
-                                    <Typography
-                                        variant="h5"
-                                        sx={{ fontWeight: 700 }}
-                                    >
-                                        Twoje zdjęcia
-                                    </Typography>
-                                    <InfiniteScroll
-                                        data="photos"
-                                        buffer={300}
-                                        loading={<LinearProgress />}
-                                        style={{ marginTop: '0px' }}
-                                    >
-                                        <ImageList
-                                            variant="masonry"
-                                            cols={2}
-                                            gap={8}
-                                            sx={{ marginTop: '0px' }}
-                                        >
-                                            {photos.data.map((photo, index) => (
-                                                <ImageListItem
-                                                    key={photo.uuid}
-                                                    component={motion.div}
-                                                    whileHover={
-                                                        reducedMotion
-                                                            ? undefined
-                                                            : { y: -4 }
-                                                    }
-                                                    sx={{
-                                                        position: 'relative',
-                                                        borderRadius: 3,
-                                                    }}
-                                                >
-                                                    <Box
-                                                        component={'img'}
-                                                        src={photo.thumbnail}
-                                                        alt="Zdjęcie z wydarzenia"
-                                                        loading="lazy"
-                                                        onClick={() =>
-                                                            setActiveIndex(
-                                                                index,
-                                                            )
-                                                        }
-                                                        sx={{
-                                                            cursor: 'zoom-in',
-                                                            borderRadius: 3,
-                                                        }}
-                                                    />
-                                                    <IconButton
-                                                        aria-label="Usuń zdjęcie"
-                                                        onClick={() => setPhotoToDelete(photo)}
-                                                        sx={{
-                                                            position:
-                                                                'absolute',
-                                                            right: 4,
-                                                            bottom: 4,
-                                                            bgcolor:
-                                                                'rgba(0,0,0,.55)',
-                                                            color: 'white',
-                                                        }}
-                                                    >
-                                                        <DeleteOutlineIcon />
-                                                    </IconButton>
-                                                </ImageListItem>
-                                            ))}
-                                        </ImageList>
-                                    </InfiniteScroll>
-                                    {!photos.data.length && (
-                                        <Typography sx={{ opacity: 0.8 }}>
-                                            Nie masz jeszcze żadnych zdjęć.
-                                        </Typography>
+                                        <Alert severity="info">To wydarzenie zostało zakończone. Zdjęcia są niedostępne.</Alert>
                                     )}
                                 </Stack>
                             </Container>
