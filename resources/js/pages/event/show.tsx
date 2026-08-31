@@ -25,7 +25,7 @@ import {
     ImageListItem,
 } from '@mui/material';
 import { motion, useReducedMotion } from 'motion/react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Keyboard, Navigation, Pagination, Zoom } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import type { Swiper as SwiperInstance } from 'swiper/types';
@@ -52,7 +52,7 @@ type PageProps = {
             background_primary: string;
             background_secondary: string;
         };
-        image:  string;
+        image: string;
 
         startsAt: Date;
         endsAt: Date;
@@ -62,6 +62,38 @@ type PageProps = {
     };
     photos: { data: Photo[] };
 };
+
+type ImageSize = {
+    width: number;
+    height: number;
+};
+
+function getContainImageSize(imageUrl: string, boxWidth: number, boxHeight: number): Promise<ImageSize> {
+    return new Promise((resolve, reject) => {
+        const safeBoxWidth = Math.max(boxWidth, 1);
+        const safeBoxHeight = Math.max(boxHeight, 1);
+        const img = new Image();
+
+        img.onload = () => {
+            const imageRatio = img.naturalWidth / img.naturalHeight;
+            let width = safeBoxWidth;
+            let height = safeBoxHeight;
+
+            if (safeBoxWidth / safeBoxHeight > imageRatio) {
+                height = safeBoxHeight;
+                width = safeBoxHeight * imageRatio;
+            } else {
+                width = safeBoxWidth;
+                height = safeBoxWidth / imageRatio;
+            }
+
+            resolve({ width, height });
+        };
+
+        img.onerror = () => reject(new Error(`Nie udało się załadować obrazka: ${imageUrl}`));
+        img.src = imageUrl;
+    });
+}
 
 export default function EventShow({ event, photos }: PageProps) {
     const picker = useRef<HTMLInputElement>(null);
@@ -85,6 +117,48 @@ export default function EventShow({ event, photos }: PageProps) {
         return title.split('&').map(name => name.trim());
     };
 
+    const bgRef = useRef<HTMLDivElement | null>(null);
+    const [bgImageSize, setBgImageSize] = useState<ImageSize>({ width: 0, height: 0 });
+
+    useEffect(() => {
+        const updateBgImageSize = async () => {
+            const el = bgRef.current;
+
+            if (!el || !event.image) {
+                setBgImageSize({ width: 0, height: 0 });
+
+                return;
+            }
+
+            const rect = el.getBoundingClientRect();
+            const boxWidth = Math.max(rect.width || el.clientWidth || window.innerWidth, 1);
+            const boxHeight = Math.max(rect.height || el.clientHeight || window.innerHeight, 1);
+
+            try {
+                const size = await getContainImageSize(event.image, boxWidth, boxHeight);
+                setBgImageSize(size);
+            } catch {
+                setBgImageSize({ width: 0, height: 0 });
+            }
+        };
+
+        void updateBgImageSize();
+
+        const resizeObserver = new ResizeObserver(() => {
+            void updateBgImageSize();
+        });
+
+        if (bgRef.current) {
+            resizeObserver.observe(bgRef.current);
+        }
+
+        window.addEventListener('resize', updateBgImageSize);
+
+        return () => {
+            resizeObserver.disconnect();
+            window.removeEventListener('resize', updateBgImageSize);
+        };
+    }, [event.image]);
 
     function upload(files: FileList | null): void {
         if (! files?.length) {
@@ -302,6 +376,7 @@ export default function EventShow({ event, photos }: PageProps) {
             </Box>
 
             <Box
+                ref={bgRef}
                 sx={{
                     display: 'flex',
                     width: '100%',
@@ -332,7 +407,7 @@ export default function EventShow({ event, photos }: PageProps) {
                             width: '100%',
                             height: '100%',
                             minHeight: '100vh',
-                            background: `linear-gradient(180deg, ${event.colors.background_primary}00 0%, ${event.colors.background_primary} 360px, ${event.colors.background_primary} 100%)`,
+                            background: `linear-gradient(180deg, ${event.colors.background_primary}00 0%, ${event.colors.background_primary} ${bgImageSize.height}px, ${event.colors.background_primary} 100%)`,
                             opacity: 1,
                         }}
                     >
