@@ -93,7 +93,7 @@ export default function EventShow({ event, photos }: PageProps) {
 
         const maxFiles = 20;
         const perFileMaxBytes = 20 * 1024 * 1024; // 20 MB
-        const maxTotalBytes = 50 * 1024 * 1024; // 50 MB
+        const maxTotalBytes = 150 * 1024 * 1024; // 150 MB
 
         if (files.length > maxFiles) {
             setUploadError(`Wybrano ${files.length} plików — maksymalnie ${maxFiles} jest dozwolone. Zmniejsz ilość zdjęć i spróbuj ponownie.`);
