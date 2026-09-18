@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Event;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -39,8 +40,14 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'name' => config('app.name'),
             'auth' => [
-                'user' => $request->user(),
+                'user' => fn () => $request->user() ? [
+                    ...$request->user()->only(['id', 'name', 'email', 'email_verified_at']),
+                    'roles' => $request->user()->getRoleNames()->values(),
+                ] : null,
             ],
+            'navigationEvents' => fn () => $request->user()
+                ? Event::query()->when(! $request->user()->hasRole('superadmin'), fn ($query) => $query->whereHas('administrators', fn ($users) => $users->whereKey($request->user()->id)))->orderBy('name')->get(['uuid', 'name', 'status'])
+                : [],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }

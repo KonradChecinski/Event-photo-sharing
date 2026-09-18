@@ -1,65 +1,24 @@
-import { Link } from '@inertiajs/react';
-import { BookOpen, FolderGit2, LayoutGrid } from 'lucide-react';
+import { Link, usePage } from '@inertiajs/react';
+import { CalendarDays, LayoutGrid, Users } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
-import { NavFooter } from '@/components/nav-footer';
-import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
-import {
-    Sidebar,
-    SidebarContent,
-    SidebarFooter,
-    SidebarHeader,
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem,
-} from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
-import type { NavItem } from '@/types';
+import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
-];
-
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: FolderGit2,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
-    },
-];
+type Shared = { auth: { user: { roles: string[] } | null }; navigationEvents: { uuid: string; name: string; status: string }[] };
 
 export function AppSidebar() {
-    return (
-        <Sidebar collapsible="icon" variant="inset">
-            <SidebarHeader>
-                <SidebarMenu>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild>
-                            <Link href={dashboard()} prefetch>
-                                <AppLogo />
-                            </Link>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                </SidebarMenu>
-            </SidebarHeader>
+    const { auth, navigationEvents } = usePage<Shared>().props;
+    const superadmin = auth.user?.roles.includes('superadmin') ?? false;
 
-            <SidebarContent>
-                <NavMain items={mainNavItems} />
-            </SidebarContent>
-
-            <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
-                <NavUser />
-            </SidebarFooter>
-        </Sidebar>
-    );
+    return <Sidebar collapsible="icon" className="border-r border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950">
+        <SidebarHeader className="h-16 border-b border-slate-200 px-2 dark:border-slate-800">
+            <SidebarMenu><SidebarMenuItem><SidebarMenuButton size="lg" asChild><Link href="/dashboard"><AppLogo /></Link></SidebarMenuButton></SidebarMenuItem></SidebarMenu>
+        </SidebarHeader>
+        <SidebarContent>
+            <SidebarGroup><SidebarGroupLabel>Panel</SidebarGroupLabel><SidebarMenu><SidebarMenuItem><SidebarMenuButton asChild><Link href="/dashboard"><LayoutGrid />Dashboard</Link></SidebarMenuButton></SidebarMenuItem></SidebarMenu></SidebarGroup>
+            <SidebarGroup><SidebarGroupLabel>Wydarzenia</SidebarGroupLabel><SidebarMenu>{navigationEvents.map((event) => <SidebarMenuItem key={event.uuid}><SidebarMenuButton asChild tooltip={event.name}><Link href={`/admin/events/${event.uuid}`}><CalendarDays /><span>{event.name}</span></Link></SidebarMenuButton></SidebarMenuItem>)}</SidebarMenu></SidebarGroup>
+            {superadmin && <SidebarGroup><SidebarGroupLabel>Administracja</SidebarGroupLabel><SidebarMenu><SidebarMenuItem><SidebarMenuButton asChild><Link href="/admin/event-admins"><Users />Administratorzy eventów</Link></SidebarMenuButton></SidebarMenuItem></SidebarMenu></SidebarGroup>}
+        </SidebarContent>
+        <SidebarFooter><NavUser /></SidebarFooter>
+    </Sidebar>;
 }

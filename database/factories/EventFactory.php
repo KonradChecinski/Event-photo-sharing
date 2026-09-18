@@ -15,8 +15,8 @@ use Illuminate\Database\Eloquent\Factories\Factory;
             'status' => 'active',
             'welcome_title' => 'Witaj!',
             'welcome_text' => 'Podziel się swoimi zdjęciami.',
-            'title'=> "Kochani goście!",
-            'text'=> "Pokażcie nam jak bawicie się na naszym weselu!",
+            'title' => 'Kochani goście!',
+            'text' => 'Pokażcie nam jak bawicie się na naszym weselu!',
         ];
     }
 

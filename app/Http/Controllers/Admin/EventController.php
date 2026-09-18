@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreEventRequest;
 use App\Http\Requests\UpdateEventAppearanceRequest;
 use App\Models\Event;
+use App\Models\EventGuest;
+use App\Models\Photo;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -13,15 +16,37 @@ use Inertia\Response;
 
 class EventController extends Controller
 {
+    public function dashboard(): Response
+    {
+        $this->authorize('viewAny', Event::class);
+        $events = $this->accessibleEvents();
+
+        return Inertia::render('dashboard', [
+            'stats' => [
+                'events' => (clone $events)->count(),
+                'activeEvents' => (clone $events)->where('status', 'active')->count(),
+                'photos' => Photo::query()->whereIn('event_id', $events->select('id'))->count(),
+                'guests' => EventGuest::query()->whereIn('event_id', $events->select('id'))->count(),
+                'guestDeletedPhotos' => Photo::query()->whereIn('event_id', $events->select('id'))->whereNotNull('deleted_at')->count(),
+            ],
+        ]);
+    }
+
     public function index(): Response
     {
-        $events = Event::query()->when(! auth()->user()->hasRole('superadmin'), fn ($q) => $q->whereHas('administrators', fn ($users) => $users->whereKey(auth()->id())))->withCount(['photos', 'guests', 'photos as deleted_photos_count' => fn ($q) => $q->whereNotNull('deleted_at')])->latest()->get();
+        $this->authorize('viewAny', Event::class);
+        $events = $this->accessibleEvents()->withCount(['photos', 'guests', 'photos as deleted_photos_count' => fn ($q) => $q->whereNotNull('deleted_at')])->latest()->get();
 
         return Inertia::render('admin/events/index',
             [
                 'events' => $events,
             ]
         );
+    }
+
+    private function accessibleEvents(): Builder
+    {
+        return Event::query()->when(! auth()->user()->hasRole('superadmin'), fn ($query) => $query->whereHas('administrators', fn ($users) => $users->whereKey(auth()->id())));
     }
 
     public function store(StoreEventRequest $request): RedirectResponse

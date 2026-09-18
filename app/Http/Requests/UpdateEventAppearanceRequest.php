@@ -25,10 +25,16 @@ class UpdateEventAppearanceRequest extends FormRequest
 
     public function rules(): array
     {
+        $statuses = ['draft', 'active', 'inactive'];
+
+        if ($this->user()?->hasRole('superadmin')) {
+            $statuses[] = 'finished';
+        }
+
         return [
             'name' => ['sometimes', 'required', 'string', 'max:120'],
             'description' => ['nullable', 'string', 'max:3000'],
-            'status' => ['sometimes', Rule::in(['draft', 'active', 'inactive', 'finished'])],
+            'status' => ['sometimes', Rule::in($statuses)],
             'starts_at' => ['nullable', 'date'],
             'ends_at' => ['nullable', 'date', 'after_or_equal:starts_at'],
             'title' => ['nullable', 'string', 'max:160'],

@@ -1,134 +1,24 @@
-import { Head, router, useForm } from '@inertiajs/react';
-import { Add } from '@mui/icons-material';
-import {
-    Box,
-    Button,
-    Card,
-    CardContent,
-    Chip,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Grid,
-    Stack,
-    TextField,
-    Typography,
-} from '@mui/material';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { Add, ArrowForward, Groups, Image } from '@mui/icons-material';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
+import { useSnackbar } from 'notistack';
 import { useState } from 'react';
 import { show, store } from '@/routes/admin/events';
-type Event = {
-    uuid: string;
-    name: string;
-    status: string;
-    description?: string;
-    photos_count: number;
-    guests_count: number;
-    deleted_photos_count: number;
-};
-export default function EventsIndex({ events }: { events: Event[] }) {
-    const [dialog, setDialog] = useState(false);
-    const form = useForm({ name: '', description: '', status: 'draft', image: null });
 
-    return (
-        <>
-            <Head title="Wydarzenia" />
-            <Box sx={{ p: 3, maxWidth: 1200, mx: 'auto' }}>
-                <Stack direction="row" justifyContent="space-between" mb={3}>
-                    <Typography variant="h4" fontWeight={800}>
-                        Wydarzenia
-                    </Typography>
-                    <Button
-                        variant="contained"
-                        startIcon={<Add />}
-                        onClick={() => setDialog(true)}
-                    >
-                        Nowe wydarzenie
-                    </Button>
-                </Stack>
-                <Grid container spacing={2}>
-                    {events.map((event) => (
-                        <Grid key={event.uuid} size={{ xs: 12, md: 6 }}>
-                            <Card
-                                onClick={() => router.visit(show(event).url)}
-                                sx={{
-                                    cursor: 'pointer',
-                                    '&:hover': { boxShadow: 6 },
-                                }}
-                            >
-                                <CardContent>
-                                    <Stack
-                                        direction="row"
-                                        justifyContent="space-between"
-                                    >
-                                        <Typography variant="h6">
-                                            {event.name}
-                                        </Typography>
-                                        <Chip label={event.status} />
-                                    </Stack>
-                                    <Typography
-                                        color="text.secondary"
-                                        sx={{ my: 2 }}
-                                    >
-                                        {event.description || 'Bez opisu'}
-                                    </Typography>
-                                    <Typography variant="body2">
-                                        {event.photos_count} zdjęć ·{' '}
-                                        {event.guests_count} gości ·{' '}
-                                        {event.deleted_photos_count} usuniętych
-                                    </Typography>
-                                </CardContent>
-                            </Card>
-                        </Grid>
-                    ))}
-                </Grid>
-            </Box>
-            <Dialog open={dialog} onClose={() => setDialog(false)}>
-                <DialogTitle>Nowe wydarzenie</DialogTitle>
-                <DialogContent>
-                    <Stack spacing={2} sx={{ pt: 1, minWidth: 320 }}>
-                        <TextField
-                            label="Nazwa"
-                            value={form.data.name}
-                            onChange={(e) =>
-                                form.setData('name', e.target.value)
-                            }
-                        />
-                        <TextField
-                            label="Opis"
-                            multiline
-                            minRows={3}
-                            value={form.data.description}
-                            onChange={(e) =>
-                                form.setData('description', e.target.value)
-                            }
-                        />
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) =>
-                                form.setData('image',
-                                    e.target.files ? e.target.files[0] : null
-                                )
-                            }
-                        />
-                    </Stack>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setDialog(false)}>Anuluj</Button>
-                    <Button
-                        variant="contained"
-                        onClick={() =>
-                            form.post(store().url, {
-                                forceFormData: true,
-                                onSuccess: () => setDialog(false),
-                            })
-                        }
-                    >
-                        Utwórz
-                    </Button>
-                </DialogActions>
-            </Dialog>
-        </>
-    );
+type Event = { uuid: string; name: string; status: string; description?: string; photos_count: number; guests_count: number; deleted_photos_count: number };
+const statusLabels: Record<string, string> = { draft: 'Szkic', active: 'Aktywne', inactive: 'Nieaktywne', finished: 'Zakończone' };
+const statusStyles: Record<string, string> = { draft: 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300', active: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-300', inactive: 'bg-amber-50 text-amber-700 dark:bg-amber-400/10 dark:text-amber-300', finished: 'bg-blue-50 text-blue-700 dark:bg-blue-400/10 dark:text-blue-300' };
+
+export default function EventsIndex({ events }: { events: Event[] }) {
+    const isSuperadmin = (usePage<{ auth: { user: { roles: string[] } | null } }>().props.auth.user?.roles ?? []).includes('superadmin');
+    const { enqueueSnackbar } = useSnackbar();
+    const [dialog, setDialog] = useState(false);
+    const form = useForm<{ name: string; description: string; status: string; image: File | null }>({ name: '', description: '', status: 'draft', image: null });
+    const createEvent = () => form.post(store().url, { forceFormData: true, onSuccess: () => { setDialog(false); form.reset(); enqueueSnackbar('Wydarzenie utworzone.', { variant: 'success' }); }, onError: () => enqueueSnackbar('Sprawdź dane wydarzenia.', { variant: 'error' }) });
+
+    return <><Head title="Wydarzenia" /><main className="mx-auto w-full max-w-7xl px-5 py-7 md:px-8 md:py-9">
+        <header className="mb-7 flex flex-col justify-between gap-4 border-b border-slate-200 pb-6 dark:border-slate-700/80 md:flex-row md:items-end"><div><p className="mb-2 text-xs font-semibold tracking-[.15em] text-blue-600 uppercase dark:text-blue-300">Biblioteka eventów</p><h1 className="text-3xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">Wydarzenia</h1><p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Wybierz wydarzenie, aby przejść do konfiguracji oraz galerii.</p></div>{isSuperadmin && <Button variant="contained" startIcon={<Add />} onClick={() => setDialog(true)}>Nowe wydarzenie</Button>}</header>
+        {events.length ? <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{events.map((event) => <Link key={event.uuid} href={show(event).url} className="group rounded-xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-200/25 transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md dark:border-slate-700/80 dark:bg-slate-800/70 dark:shadow-none dark:hover:border-blue-400/40"><div className="flex items-start justify-between gap-4"><div className="min-w-0"><h2 className="truncate text-lg font-semibold text-slate-900 dark:text-slate-100">{event.name}</h2><p className="mt-2 line-clamp-2 min-h-10 text-sm leading-5 text-slate-500 dark:text-slate-400">{event.description || 'Brak opisu wydarzenia.'}</p></div><span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${statusStyles[event.status] ?? statusStyles.draft}`}>{statusLabels[event.status] ?? event.status}</span></div><div className="mt-5 flex items-center gap-4 border-t border-slate-100 pt-4 text-sm text-slate-500 dark:border-slate-700/70 dark:text-slate-400"><span className="inline-flex items-center gap-1.5"><Image fontSize="small" />{event.photos_count}</span><span className="inline-flex items-center gap-1.5"><Groups fontSize="small" />{event.guests_count}</span><span className="ml-auto inline-flex items-center gap-1 text-blue-700 opacity-0 transition-opacity group-hover:opacity-100 dark:text-blue-300">Otwórz <ArrowForward fontSize="small" /></span></div></Link>)}</section> : <div className="rounded-xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center dark:border-slate-700 dark:bg-slate-800/50"><h2 className="font-semibold text-slate-800 dark:text-slate-100">Brak wydarzeń</h2><p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{isSuperadmin ? 'Utwórz pierwsze wydarzenie, aby skonfigurować galerię dla gości.' : 'Nie masz obecnie przypisanego wydarzenia.'}</p></div>}
+    </main><Dialog open={dialog} onClose={() => setDialog(false)} fullWidth maxWidth="sm"><DialogTitle>Nowe wydarzenie</DialogTitle><DialogContent><div className="flex flex-col gap-4 pt-2"><TextField label="Nazwa wydarzenia" value={form.data.name} onChange={(event) => form.setData('name', event.target.value)} error={!!form.errors.name} helperText={form.errors.name} autoFocus /><TextField label="Opis" multiline minRows={3} value={form.data.description} onChange={(event) => form.setData('description', event.target.value)} error={!!form.errors.description} helperText={form.errors.description} /><Button component="label" variant="outlined">Dodaj obrazek<input hidden type="file" accept="image/*" onChange={(event) => form.setData('image', event.target.files?.[0] ?? null)} /></Button></div></DialogContent><DialogActions><Button onClick={() => setDialog(false)}>Anuluj</Button><Button variant="contained" onClick={createEvent} disabled={form.processing}>Utwórz wydarzenie</Button></DialogActions></Dialog></>;
 }
+

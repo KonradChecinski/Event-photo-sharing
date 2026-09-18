@@ -1,4 +1,6 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, usePage } from '@inertiajs/react';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import PhotoLibraryOutlinedIcon from '@mui/icons-material/PhotoLibraryOutlined';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import {
     Box,
@@ -25,7 +27,7 @@ import { useSnackbar } from 'notistack';
 import { useState, useRef } from 'react';
 import { update } from '@/routes/admin/events';
 import { index as photosIndex } from '@/routes/admin/photos';
-import {background} from '@/routes/events'
+import { background } from '@/routes/events';
 
 type Event = {
     uuid: string;
@@ -56,6 +58,10 @@ export default function EventShow({
     eventUrl: string;
     backgroundUrl: string;
 }) {
+    const isSuperadmin = (
+        usePage<{ auth: { user: { roles: string[] } | null } }>().props.auth
+            .user?.roles ?? []
+    ).includes('superadmin');
     const form = useForm({
         name: event.name || '',
         description: event.description ?? '',
@@ -71,7 +77,8 @@ export default function EventShow({
         secondary_color: event.secondary_color || '#EC4899',
         text_color: event.text_color || '#FFFFFF',
         background_color_primary: event.background_color_primary || '#1E1B4B',
-        background_color_secondary: event.background_color_secondary || '#2D3748',
+        background_color_secondary:
+            event.background_color_secondary || '#2D3748',
     });
 
     const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -109,32 +116,80 @@ export default function EventShow({
 
     dayjs.locale('pl');
 
-
     return (
         <>
             <Head title={event.name} />
-            <Box sx={{ p: 3, maxWidth: 2000, mx: 'auto' }}>
+            <Box sx={{ p: { xs: 2, md: 3 }, maxWidth: 1800, mx: 'auto' }}>
                 <Stack spacing={3}>
-                    <Stack direction="row">
-                        <Typography variant="h4" sx={{ fontWeight: 800 }}>
-                            Edit: {event.name}
+                    <Box
+                        sx={{
+                            borderBottom: '1px solid',
+                            borderColor: 'divider',
+                            pb: 3,
+                        }}
+                    >
+                        <Typography
+                            variant="overline"
+                            sx={{
+                                color: 'primary.main',
+                                fontWeight: 700,
+                                letterSpacing: '.12em',
+                            }}
+                        >
+                            Konfiguracja wydarzenia
                         </Typography>
-                        <Stack direction="row">
-                            <Button
-                                onClick={() =>
-                                    navigator.clipboard.writeText(eventUrl)
-                                }
-                            >
-                                Copy link
-                            </Button>
-                            <Button
-                                href={photosIndex(event).url}
-                                variant="contained"
-                            >
-                                Gallery
-                            </Button>
+                        <Stack
+                            direction={{ xs: 'column', md: 'row' }}
+                            alignItems={{ md: 'end' }}
+                            gap={2}
+                            sx={{ justifyContent: 'space-between' }}
+                        >
+                            <Box>
+                                <Typography
+                                    variant="h4"
+                                    sx={{
+                                        fontWeight: 750,
+                                        letterSpacing: '-.03em',
+                                    }}
+                                >
+                                    {event.name}
+                                </Typography>
+                                <Typography
+                                    color="text.secondary"
+                                    sx={{ mt: 0.75 }}
+                                >
+                                    Edytuj stronę gości, status i identyfikację
+                                    wizualną eventu.
+                                </Typography>
+                            </Box>
+
+                            <div className="flex flex-wrap items-center gap-2">
+                                <Button
+                                    variant="text"
+                                    startIcon={<ContentCopyIcon />}
+                                    onClick={() =>
+                                        navigator.clipboard
+                                            .writeText(eventUrl)
+                                            .then(() =>
+                                                enqueueSnackbar(
+                                                    'Link do wydarzenia skopiowany.',
+                                                    { variant: 'success' },
+                                                ),
+                                            )
+                                    }
+                                >
+                                    Kopiuj link
+                                </Button>
+                                <Button
+                                    href={photosIndex(event).url}
+                                    variant="contained"
+                                    startIcon={<PhotoLibraryOutlinedIcon />}
+                                >
+                                    Galeria
+                                </Button>
+                            </div>
                         </Stack>
-                    </Stack>
+                    </Box>
 
                     <Grid container spacing={2}>
                         {[
@@ -143,12 +198,18 @@ export default function EventShow({
                             ['Usunięte', stats.deletedPhotos],
                         ].map(([label, value]) => (
                             <Grid key={String(label)} size={{ xs: 12, md: 4 }}>
-                                <Card>
+                                <Card
+                                    variant="outlined"
+                                    sx={{ boxShadow: 'none', borderRadius: 2 }}
+                                >
                                     <CardContent>
                                         <Typography color="text.secondary">
                                             {label}
                                         </Typography>
-                                        <Typography variant="h3">
+                                        <Typography
+                                            variant="h3"
+                                            sx={{ fontWeight: 700 }}
+                                        >
                                             {value}
                                         </Typography>
                                     </CardContent>
@@ -159,7 +220,10 @@ export default function EventShow({
 
                     <Grid container spacing={2}>
                         <Grid size={{ xs: 12, md: 8 }}>
-                            <Card>
+                            <Card
+                                variant="outlined"
+                                sx={{ boxShadow: 'none', borderRadius: 2 }}
+                            >
                                 <CardContent>
                                     <Stack
                                         component="form"
@@ -259,9 +323,11 @@ export default function EventShow({
                                                     <MenuItem value="inactive">
                                                         Nieaktywne
                                                     </MenuItem>
-                                                    <MenuItem value="finished">
-                                                        Zakończone
-                                                    </MenuItem>
+                                                    {isSuperadmin && (
+                                                        <MenuItem value="finished">
+                                                            Zakończone
+                                                        </MenuItem>
+                                                    )}
                                                 </Select>
                                             </FormControl>
 
@@ -280,7 +346,7 @@ export default function EventShow({
                                         {/* Titles and texts */}
                                         <Stack spacing={2}>
                                             <TextField
-                                                label="Tytuł (title)"
+                                                label="Tytuł strony"
                                                 value={form.data.title}
                                                 onChange={(e) =>
                                                     form.setData(
@@ -290,7 +356,7 @@ export default function EventShow({
                                                 }
                                             />
                                             <TextField
-                                                label="Text (text)"
+                                                label="Tekst strony"
                                                 value={form.data.text}
                                                 onChange={(e) =>
                                                     form.setData(
@@ -300,7 +366,7 @@ export default function EventShow({
                                                 }
                                             />
                                             <TextField
-                                                label="Welcome title"
+                                                label="Tytuł powitania"
                                                 value={form.data.welcome_title}
                                                 onChange={(e) =>
                                                     form.setData(
@@ -310,7 +376,7 @@ export default function EventShow({
                                                 }
                                             />
                                             <TextField
-                                                label="Welcome text"
+                                                label="Tekst powitania"
                                                 value={form.data.welcome_text}
                                                 onChange={(e) =>
                                                     form.setData(
@@ -376,7 +442,7 @@ export default function EventShow({
                                             <MuiColorInput
                                                 format="hex"
                                                 value={form.data.primary_color}
-                                                label="Primary color"
+                                                label="Kolor główny"
                                                 onChange={(val) =>
                                                     form.setData(
                                                         'primary_color',
@@ -389,7 +455,7 @@ export default function EventShow({
                                                 value={
                                                     form.data.secondary_color
                                                 }
-                                                label="Secondary color"
+                                                label="Kolor dodatkowy"
                                                 onChange={(val) =>
                                                     form.setData(
                                                         'secondary_color',
@@ -400,7 +466,7 @@ export default function EventShow({
                                             <MuiColorInput
                                                 format="hex"
                                                 value={form.data.text_color}
-                                                label="Text color"
+                                                label="Kolor tekstu"
                                                 onChange={(val) =>
                                                     form.setData(
                                                         'text_color',
@@ -414,7 +480,7 @@ export default function EventShow({
                                                     form.data
                                                         .background_color_primary
                                                 }
-                                                label="Background primary"
+                                                label="Tło główne"
                                                 onChange={(val) =>
                                                     form.setData(
                                                         'background_color_primary',
@@ -428,7 +494,7 @@ export default function EventShow({
                                                     form.data
                                                         .background_color_secondary
                                                 }
-                                                label="Background secondary"
+                                                label="Tło dodatkowe"
                                                 onChange={(val) =>
                                                     form.setData(
                                                         'background_color_secondary',
@@ -452,7 +518,15 @@ export default function EventShow({
                         </Grid>
 
                         <Grid size={{ xs: 12, md: 4 }}>
-                            <Card>
+                            <Card
+                                variant="outlined"
+                                sx={{
+                                    boxShadow: 'none',
+                                    borderRadius: 2,
+                                    position: { md: 'sticky' },
+                                    top: { md: 24 },
+                                }}
+                            >
                                 <CardContent>
                                     <Stack spacing={2}>
                                         <Stack
@@ -463,7 +537,7 @@ export default function EventShow({
                                             }}
                                         >
                                             <Typography variant="h6">
-                                                Podgląd
+                                                Podgląd strony gościa
                                             </Typography>
                                             <IconButton
                                                 size="small"
@@ -476,7 +550,11 @@ export default function EventShow({
                                         <Box
                                             sx={{
                                                 height: '70vh',
-                                                border: '1px solid rgba(0,0,0,0.08)',
+                                                border: '1px solid',
+                                                borderColor: 'divider',
+                                                borderRadius: 1.5,
+                                                overflow: 'hidden',
+                                                bgcolor: 'background.default',
                                             }}
                                         >
                                             <iframe

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\EventAdminController;
 use App\Http\Controllers\Admin\EventController as AdminEventController;
 use App\Http\Controllers\Admin\PhotoController as AdminPhotoController;
 use App\Http\Controllers\GuestEventController;
@@ -25,6 +26,10 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::get('/events/{event}/photos/{photo}/download', [AdminPhotoController::class, 'download'])->name('photos.download');
     Route::delete('/events/{event}/photos/{photo}', [AdminPhotoController::class, 'destroy'])->name('photos.destroy');
     Route::post('/events/{event}/photos/zip', [AdminPhotoController::class, 'zip'])->name('photos.zip');
+    Route::delete('/events/{event}/photos', [AdminPhotoController::class, 'destroySelected'])->name('photos.destroy-selected');
+    Route::get('/event-admins', [EventAdminController::class, 'index'])->name('event-admins.index');
+    Route::post('/event-admins', [EventAdminController::class, 'store'])->name('event-admins.store');
+    Route::patch('/event-admins/{user}', [EventAdminController::class, 'update'])->name('event-admins.update');
 });
-Route::middleware(['auth', 'verified'])->get('/dashboard', [AdminEventController::class, 'index'])->name('dashboard');
+Route::middleware(['auth', 'verified'])->get('/dashboard', [AdminEventController::class, 'dashboard'])->name('dashboard');
 require __DIR__.'/settings.php';

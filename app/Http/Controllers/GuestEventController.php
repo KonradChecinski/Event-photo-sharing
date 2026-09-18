@@ -9,7 +9,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Symfony\Component\HttpFoundation\Response;
-use function Laravel\Prompts\title;
 
 class GuestEventController extends Controller
 {
@@ -17,7 +16,7 @@ class GuestEventController extends Controller
     {
         // Allow draft viewing only to authorized admins (superadmin or event admin via policy)
         if ($event->status === 'draft') {
-            if (! auth()->check() || !(auth()->user()->hasRole('superadmin') || auth()->user()->can('view', $event))) {
+            if (! auth()->check() || ! (auth()->user()->hasRole('superadmin') || auth()->user()->can('view', $event))) {
                 abort(404);
             }
         }
@@ -58,7 +57,7 @@ class GuestEventController extends Controller
                     'background_primary' => $event->background_color_primary,
                     'background_secondary' => $event->background_color_secondary,
                 ],
-                'image' =>  $event->image ? route('events.background', $event) : null,
+                'image' => $event->image ? route('events.background', $event) : null,
 
                 'startsAt' => $event->starts_at?->toIso8601String(),
                 'endsAt' => $event->ends_at?->toIso8601String(),
@@ -68,7 +67,7 @@ class GuestEventController extends Controller
             ],
             'photos' => Inertia::scroll(
                 $guest->photos()
-                    ->when(!$showPhotos, fn ($q) => $q->whereRaw('1=0'))
+                    ->when(! $showPhotos, fn ($q) => $q->whereRaw('1=0'))
                     ->whereNull('deleted_at')
                     ->latest()
                     ->paginate(24)
@@ -96,9 +95,9 @@ class GuestEventController extends Controller
 
     public function background(Request $request, Event $event, EventGuestIdentity $identity)
     {
-//        dd($event);
+        //        dd($event);
         // ensure the event is visible to guests
-//        abort_unless($event->status !== 'draft', 404);
+        //        abort_unless($event->status !== 'draft', 404);
 
         // resolve guest identity (ensures access and may set a cookie)
         [$guest, $cookie] = $identity->resolve($request, $event);

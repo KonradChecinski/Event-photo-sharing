@@ -6,13 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\Photo;
 use App\Services\PhotoStorageService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use ZipArchive;
 
 class PhotoController extends Controller
 {
-    public function index(Event $event)
+    public function index(Request $request, Event $event)
     {
         $this->authorize('view', $event);
 
@@ -20,7 +21,7 @@ class PhotoController extends Controller
             [
                 'event' => $event,
                 'photos' => $event->photos()->with('guest:id,uuid')
-                    ->latest()
+                    ->orderBy('created_at', $request->string('sort')->value() === 'oldest' ? 'asc' : 'desc')
                     ->paginate(36)
                     ->through(fn ($photo) => [
                         'uuid' => $photo->uuid,
@@ -67,20 +68,47 @@ class PhotoController extends Controller
     public function zip(Request $request, Event $event)
     {
         $this->authorize('view', $event);
-        $ids = $request->validate(['photos' => ['nullable', 'array'], 'photos.*' => ['uuid']])['photos'] ?? [];
-        $photos = $event->photos()->when($ids, fn ($q) => $q->whereIn('uuid', $ids))->get();
+        $data = $request->validate([
+            'photos' => ['nullable', 'array'],
+            'photos.*' => ['uuid'],
+            'include_guest_deleted' => ['nullable', 'boolean'],
+            'all' => ['nullable', 'boolean'],
+        ]);
+        $all = (bool) ($data['all'] ?? false);
+        $ids = $data['photos'] ?? [];
+        abort_unless($all || count($ids) > 0, 422, 'Wybierz co najmniej jedno zdjęcie.');
+        $photos = $event->photos()
+            ->when(! $all, fn ($query) => $query->whereIn('uuid', $ids))
+            ->when($all && ! ($data['include_guest_deleted'] ?? false), fn ($query) => $query->whereNull('deleted_at'))
+            ->get();
         abort_if($photos->isEmpty(), 422, 'Brak zdjęć do pobrania.');
         $zipPath = tempnam(sys_get_temp_dir(), 'event-').'.zip';
         $zip = new ZipArchive;
         abort_unless($zip->open($zipPath, ZipArchive::CREATE) === true, 500);
-        foreach ($photos as $photo) {
+        foreach ($photos as $index => $photo) {
             $stream = Storage::disk(config('filesystems.default'))->readStream($photo->original_path);
             if ($stream) {
-                $zip->addFromString($photo->original_name, stream_get_contents($stream));
+                $extension = pathinfo($photo->original_name, PATHINFO_EXTENSION);
+                $filename = sprintf('%03d-%s.%s', $index + 1, str($photo->uuid)->substr(0, 12), $extension ?: 'file');
+                $zip->addFromString($filename, stream_get_contents($stream));
                 fclose($stream);
             }
         } $zip->close();
 
         return response()->download($zipPath, 'event-'.$event->uuid.'.zip')->deleteFileAfterSend();
+    }
+
+    public function destroySelected(Request $request, Event $event, PhotoStorageService $storage): RedirectResponse
+    {
+        $this->authorize('view', $event);
+        $ids = $request->validate(['photos' => ['required', 'array', 'min:1'], 'photos.*' => ['uuid']])['photos'];
+        $photos = $event->photos()->whereIn('uuid', $ids)->get();
+
+        foreach ($photos as $photo) {
+            $this->authorize('delete', $photo);
+            $storage->permanentlyDelete($photo);
+        }
+
+        return back()->with('success', 'Wybrane zdjęcia usunięto trwale.');
     }
 }
