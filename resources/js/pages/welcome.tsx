@@ -22,17 +22,16 @@ export default function Welcome() {
             >
                 <Container maxWidth="md">
                     <Stack spacing={4}>
-                        <Stack direction="row" gap={1} alignItems="center">
+                        <Stack direction="row" sx={{ gap: 1, alignItems: 'center' }}>
                             <CameraAlt color="primary" />
-                            <Typography fontWeight={800}>
+                            <Typography sx={{ fontWeight: 800 }}>
                                 Event Photo Sharing
                             </Typography>
                         </Stack>
                         <Box>
                             <Typography
                                 variant="h2"
-                                fontWeight={800}
-                                sx={{ maxWidth: 700 }}
+                                sx={{ maxWidth: 700, fontWeight: 800 }}
                             >
                                 Zdjęcia z wydarzenia. W jednym, bezpiecznym
                                 miejscu.
@@ -49,7 +48,7 @@ export default function Welcome() {
                             </Typography>
                         </Box>
                         <Button
-                            component={Link}
+                            component={Link as any}
                             href="/login"
                             variant="contained"
                             size="large"
@@ -81,10 +80,10 @@ export default function Welcome() {
                                     <Stack
                                         direction="row"
                                         spacing={1}
-                                        alignItems="center"
+                                        sx={{ alignItems: 'center' }}
                                     >
                                         <>{icon}</>
-                                        <Typography fontWeight={700}>
+                                        <Typography sx={{ fontWeight: 700 }}>
                                             {title}
                                         </Typography>
                                     </Stack>

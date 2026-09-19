@@ -10,7 +10,17 @@ export type UseAppearanceReturn = {
 };
 
 const listeners = new Set<() => void>();
-let currentAppearance: Appearance = 'system';
+
+const getStoredAppearance = (): Appearance => {
+    if (typeof window === 'undefined') {
+        return 'system';
+    }
+
+    return (localStorage.getItem('appearance') as Appearance) || 'system';
+};
+
+let currentAppearance: Appearance =
+    typeof window !== 'undefined' ? getStoredAppearance() : 'system';
 
 const prefersDark = (): boolean => {
     if (typeof window === 'undefined') {
@@ -27,14 +37,6 @@ const setCookie = (name: string, value: string, days = 365): void => {
 
     const maxAge = days * 24 * 60 * 60;
     document.cookie = `${name}=${value};path=/;max-age=${maxAge};SameSite=Lax`;
-};
-
-const getStoredAppearance = (): Appearance => {
-    if (typeof window === 'undefined') {
-        return 'system';
-    }
-
-    return (localStorage.getItem('appearance') as Appearance) || 'system';
 };
 
 const isDarkMode = (appearance: Appearance): boolean => {
@@ -68,7 +70,10 @@ const mediaQuery = (): MediaQueryList | null => {
     return window.matchMedia('(prefers-color-scheme: dark)');
 };
 
-const handleSystemThemeChange = (): void => applyTheme(currentAppearance);
+const handleSystemThemeChange = (): void => {
+    applyTheme(currentAppearance);
+    notify();
+};
 
 export function initializeTheme(): void {
     if (typeof window === 'undefined') {
@@ -82,21 +87,24 @@ export function initializeTheme(): void {
 
     currentAppearance = getStoredAppearance();
     applyTheme(currentAppearance);
+    notify();
 
     // Set up system theme change listener
     mediaQuery()?.addEventListener('change', handleSystemThemeChange);
 }
 
 export function useAppearance(): UseAppearanceReturn {
-    const appearance: Appearance = useSyncExternalStore(
+    const snapshot = useSyncExternalStore(
         subscribe,
-        () => currentAppearance,
-        () => 'system',
+        () =>
+            `${currentAppearance}:${isDarkMode(currentAppearance) ? 'dark' : 'light'}`,
+        () => 'system:dark',
     );
 
-    const resolvedAppearance: ResolvedAppearance = isDarkMode(appearance)
-        ? 'dark'
-        : 'light';
+    const [appearance, resolvedAppearance] = snapshot.split(':') as [
+        Appearance,
+        ResolvedAppearance,
+    ];
 
     const updateAppearance = (mode: Appearance): void => {
         currentAppearance = mode;

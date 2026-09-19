@@ -1,22 +1,369 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { CalendarDays, Camera, ChevronRight, Image, Users } from 'lucide-react';
+import {
+    ArrowForward,
+    CalendarMonth,
+    ChevronRight,
+    Groups,
+    InfoOutlined,
+    PhotoCamera,
+    PhotoLibrary,
+} from '@mui/icons-material';
+import {
+    Box,
+    Button,
+    Card,
+    CardContent,
+    Chip,
+    Grid,
+    Paper,
+    Stack,
+    Typography,
+} from '@mui/material';
 
-type DashboardStats = { events: number; activeEvents: number; photos: number; guests: number; guestDeletedPhotos: number };
+type DashboardStats = {
+    events: number;
+    activeEvents: number;
+    photos: number;
+    guests: number;
+    guestDeletedPhotos: number;
+};
+
+const statusLabels: Record<string, string> = {
+    draft: 'Szkic',
+    active: 'Aktywne',
+    inactive: 'Nieaktywne',
+    finished: 'Zakończone',
+};
+
+const statusColorMap: Record<
+    string,
+    'default' | 'success' | 'warning' | 'info'
+> = {
+    draft: 'default',
+    active: 'success',
+    inactive: 'warning',
+    finished: 'info',
+};
 
 export default function Dashboard({ stats }: { stats: DashboardStats }) {
-    const events = usePage<{ navigationEvents: { uuid: string; name: string; status: string }[] }>().props.navigationEvents;
+    const events =
+        usePage<{
+            navigationEvents: { uuid: string; name: string; status: string }[];
+        }>().props.navigationEvents;
+
     const summary = [
-        { label: 'Wydarzenia', value: stats.events, icon: CalendarDays, detail: `${stats.activeEvents} aktywnych` },
-        { label: 'Zdjęcia', value: stats.photos, icon: Image, detail: `${stats.guestDeletedPhotos} usuniętych przez gości` },
-        { label: 'Goście', value: stats.guests, icon: Users, detail: 'anonimowe sesje uczestników' },
+        {
+            label: 'Wydarzenia',
+            value: stats.events,
+            icon: CalendarMonth,
+            detail: `${stats.activeEvents} aktywnych`,
+        },
+        {
+            label: 'Zdjęcia',
+            value: stats.photos,
+            icon: PhotoLibrary,
+            detail: `${stats.guestDeletedPhotos} usuniętych przez gości`,
+        },
+        {
+            label: 'Goście',
+            value: stats.guests,
+            icon: Groups,
+            detail: 'anonimowe sesje uczestników',
+        },
     ];
 
-    return <><Head title="Dashboard" /><main className="mx-auto w-full max-w-7xl px-5 py-7 md:px-8 md:py-9">
-        <section className="mb-7 flex flex-col justify-between gap-5 border-b border-slate-200 pb-7 dark:border-slate-700/80 md:flex-row md:items-end">
-            <div><p className="mb-2 text-xs font-semibold tracking-[0.16em] text-blue-600 uppercase dark:text-blue-300">Panel administracyjny</p><h1 className="text-3xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">Przegląd wydarzeń</h1><p className="mt-2 max-w-xl text-sm leading-6 text-slate-500 dark:text-slate-400">Dane dotyczą wyłącznie eventów, do których masz przydzielony dostęp.</p></div>
-            <Link href="/admin" className="inline-flex items-center gap-1 self-start text-sm font-medium text-blue-700 hover:text-blue-900 dark:text-blue-300 dark:hover:text-blue-200 md:self-auto">Zobacz wszystkie eventy <ChevronRight size={16} /></Link>
-        </section>
-        <section className="grid gap-3 sm:grid-cols-3">{summary.map(({ label, value, icon: Icon, detail }) => <article key={label} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-200/30 dark:border-slate-700/80 dark:bg-slate-800/70 dark:shadow-none"><div className="flex items-start justify-between"><p className="text-sm font-medium text-slate-600 dark:text-slate-300">{label}</p><span className="rounded-lg bg-blue-50 p-2 text-blue-700 dark:bg-blue-400/10 dark:text-blue-300"><Icon size={18} /></span></div><p className="mt-5 text-3xl font-semibold tracking-tight text-slate-900 dark:text-white">{value}</p><p className="mt-2 text-xs text-slate-500 dark:text-slate-400">{detail}</p></article>)}</section>
-        <section className="mt-7 grid gap-5 lg:grid-cols-[1.45fr_.85fr]"><article className="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-700/80 dark:bg-slate-800/70"><header className="flex items-center justify-between border-b border-slate-100 px-5 py-4 dark:border-slate-700/70"><div><h2 className="font-semibold text-slate-900 dark:text-slate-100">Twoje wydarzenia</h2><p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Szybki dostęp do konfiguracji i galerii</p></div><Camera size={19} className="text-slate-400" /></header><div className="divide-y divide-slate-100 dark:divide-slate-700/70">{events.slice(0, 6).map((event) => <Link key={event.uuid} href={`/admin/events/${event.uuid}`} className="group flex items-center justify-between px-5 py-3.5 transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/30"><div><p className="font-medium text-slate-800 dark:text-slate-200">{event.name}</p><p className="mt-0.5 text-xs capitalize text-slate-500 dark:text-slate-400">{event.status}</p></div><ChevronRight size={18} className="text-slate-400 transition-transform group-hover:translate-x-0.5" /></Link>)}{events.length === 0 && <p className="px-5 py-8 text-sm text-slate-500 dark:text-slate-400">Brak przypisanych wydarzeń.</p>}</div></article><aside className="rounded-xl border border-blue-100 bg-blue-50/65 p-5 dark:border-blue-400/20 dark:bg-blue-400/8"><p className="text-xs font-semibold tracking-[0.14em] text-blue-700 uppercase dark:text-blue-300">Wskazówka</p><h2 className="mt-3 text-lg font-semibold text-slate-900 dark:text-slate-100">Galeria pod kontrolą</h2><p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">W edytorze eventu otwórz galerię, aby pobrać zdjęcia, oznaczyć zestaw do ZIP-a lub trwale usunąć pliki.</p></aside></section>
-    </main></>;
+    return (
+        <>
+            <Head title="Dashboard" />
+            <Box
+                component="main"
+                sx={{
+                    width: '100%',
+                    p: { xs: 2, md: 3 },
+                }}
+            >
+                <Box
+                    sx={{
+                        borderBottom: '1px solid',
+                        borderColor: 'divider',
+                        pb: 3,
+                        mb: 3,
+                    }}
+                >
+                    <Typography
+                        variant="overline"
+                        sx={{
+                            display: 'block',
+                            color: 'primary.main',
+                            fontWeight: 700,
+                            letterSpacing: '.12em',
+                        }}
+                    >
+                        Panel administracyjny
+                    </Typography>
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            flexDirection: { xs: 'column', md: 'row' },
+                            alignItems: { md: 'flex-end' },
+                            justifyContent: 'space-between',
+                            gap: 2,
+                        }}
+                    >
+                        <Box>
+                            <Typography
+                                variant="h4"
+                                sx={{
+                                    fontSize: '1.875rem',
+                                    lineHeight: 1.2,
+                                    fontWeight: 750,
+                                    letterSpacing: '-.03em',
+                                }}
+                            >
+                                Przegląd wydarzeń
+                            </Typography>
+                            <Typography
+                                variant="body2"
+                                color="text.secondary"
+                                sx={{ mt: 0.75 }}
+                            >
+                                Dane dotyczą wyłącznie eventów, do których masz
+                                przydzielony dostęp.
+                            </Typography>
+                        </Box>
+                        <Link href="/admin" style={{ textDecoration: 'none' }}>
+                            <Button
+                                variant="outlined"
+                                endIcon={<ArrowForward />}
+                            >
+                                Zobacz wszystkie eventy
+                            </Button>
+                        </Link>
+                    </Box>
+                </Box>
+
+                <Grid container spacing={2} sx={{ mb: 3 }}>
+                    {summary.map(({ label, value, icon: Icon, detail }) => (
+                        <Grid key={label} size={{ xs: 12, sm: 4 }}>
+                            <Card
+                                variant="outlined"
+                                sx={{
+                                    borderRadius: 2,
+                                    bgcolor: 'background.paper',
+                                    color: 'text.primary',
+                                }}
+                            >
+                                <CardContent>
+                                    <Box
+                                        sx={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                        }}
+                                    >
+                                        <Typography
+                                            variant="body2"
+                                            color="text.secondary"
+                                            sx={{ fontWeight: 600 }}
+                                        >
+                                            {label}
+                                        </Typography>
+                                        <Box
+                                            sx={{
+                                                p: 1,
+                                                borderRadius: 1.5,
+                                                bgcolor: 'action.hover',
+                                                color: 'primary.main',
+                                                display: 'flex',
+                                            }}
+                                        >
+                                            <Icon fontSize="small" />
+                                        </Box>
+                                    </Box>
+                                    <Typography
+                                        variant="h3"
+                                        sx={{ fontWeight: 700, mt: 1.5, mb: 0.5 }}
+                                    >
+                                        {value}
+                                    </Typography>
+                                    <Typography
+                                        variant="caption"
+                                        color="text.secondary"
+                                    >
+                                        {detail}
+                                    </Typography>
+                                </CardContent>
+                            </Card>
+                        </Grid>
+                    ))}
+                </Grid>
+
+                <Grid container spacing={2}>
+                    <Grid size={{ xs: 12, lg: 8 }}>
+                        <Card
+                            variant="outlined"
+                            sx={{
+                                borderRadius: 2,
+                                bgcolor: 'background.paper',
+                                color: 'text.primary',
+                            }}
+                        >
+                            <Box
+                                sx={{
+                                    p: 2.5,
+                                    borderBottom: '1px solid',
+                                    borderColor: 'divider',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                }}
+                            >
+                                <Box>
+                                    <Typography
+                                        variant="subtitle1"
+                                        sx={{ fontWeight: 700 }}
+                                    >
+                                        Twoje wydarzenia
+                                    </Typography>
+                                    <Typography
+                                        variant="caption"
+                                        color="text.secondary"
+                                    >
+                                        Szybki dostęp do konfiguracji i galerii
+                                    </Typography>
+                                </Box>
+                                <PhotoCamera
+                                    fontSize="small"
+                                    sx={{ color: 'text.secondary' }}
+                                />
+                            </Box>
+                            <Stack
+                                sx={{
+                                    '& > *:not(:last-child)': {
+                                        borderBottom: '1px solid',
+                                        borderColor: 'divider',
+                                    },
+                                }}
+                            >
+                                {events.slice(0, 6).map((event) => (
+                                    <Link
+                                        key={event.uuid}
+                                        href={`/admin/events/${event.uuid}`}
+                                        style={{
+                                            textDecoration: 'none',
+                                            color: 'inherit',
+                                        }}
+                                    >
+                                        <Box
+                                            sx={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent:
+                                                    'space-between',
+                                                px: 2.5,
+                                                py: 1.75,
+                                                transition:
+                                                    'background-color 0.15s ease',
+                                                '&:hover': {
+                                                    bgcolor: 'action.hover',
+                                                },
+                                            }}
+                                        >
+                                            <Box>
+                                                <Typography
+                                                    variant="body1"
+                                                    sx={{ fontWeight: 600 }}
+                                                >
+                                                    {event.name}
+                                                </Typography>
+                                                <Box sx={{ mt: 0.5 }}>
+                                                    <Chip
+                                                        size="small"
+                                                        variant="outlined"
+                                                        color={
+                                                            statusColorMap[
+                                                                event.status
+                                                            ] ?? 'default'
+                                                        }
+                                                        label={
+                                                            statusLabels[
+                                                                event.status
+                                                            ] ?? event.status
+                                                        }
+                                                    />
+                                                </Box>
+                                            </Box>
+                                            <ChevronRight
+                                                fontSize="small"
+                                                sx={{ color: 'text.secondary' }}
+                                            />
+                                        </Box>
+                                    </Link>
+                                ))}
+                                {events.length === 0 && (
+                                    <Box sx={{ p: 4, textAlign: 'center' }}>
+                                        <Typography
+                                            variant="body2"
+                                            color="text.secondary"
+                                        >
+                                            Brak przypisanych wydarzeń.
+                                        </Typography>
+                                    </Box>
+                                )}
+                            </Stack>
+                        </Card>
+                    </Grid>
+
+                    <Grid size={{ xs: 12, lg: 4 }}>
+                        <Paper
+                            variant="outlined"
+                            sx={{
+                                p: 3,
+                                borderRadius: 2,
+                                bgcolor: 'background.paper',
+                                color: 'text.primary',
+                                height: '100%',
+                            }}
+                        >
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 1,
+                                    color: 'primary.main',
+                                    mb: 1.5,
+                                }}
+                            >
+                                <InfoOutlined fontSize="small" />
+                                <Typography
+                                    variant="overline"
+                                    sx={{
+                                        fontWeight: 700,
+                                        letterSpacing: '.12em',
+                                    }}
+                                >
+                                    Wskazówka
+                                </Typography>
+                            </Box>
+                            <Typography
+                                variant="h6"
+                                sx={{ fontWeight: 700, mb: 1 }}
+                            >
+                                Galeria pod kontrolą
+                            </Typography>
+                            <Typography
+                                variant="body2"
+                                color="text.secondary"
+                                sx={{ lineHeight: 1.6 }}
+                            >
+                                W edytorze eventu otwórz galerię, aby pobrać
+                                zdjęcia, oznaczyć zestaw do archiwum ZIP lub
+                                trwale usunąć niechciane pliki.
+                            </Typography>
+                        </Paper>
+                    </Grid>
+                </Grid>
+            </Box>
+        </>
+    );
 }

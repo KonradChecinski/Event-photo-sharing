@@ -34,8 +34,22 @@ function MuiAppTheme({ children }: { children: React.ReactNode }) {
               },
         shape: { borderRadius: 10 },
         components: {
-            MuiPaper: { styleOverrides: { root: { backgroundImage: 'none' } } },
+            MuiPaper: {
+                styleOverrides: {
+                    root: {
+                        backgroundImage: 'none',
+                        backgroundColor: dark ? '#263246' : '#fafcff',
+                    },
+                },
+            },
             MuiCard: { styleOverrides: { root: { boxShadow: 'none' } } },
+            MuiOutlinedInput: {
+                styleOverrides: {
+                    root: {
+                        backgroundColor: dark ? '#1d2634' : '#f3f6fb',
+                    },
+                },
+            },
             MuiButton: {
                 styleOverrides: {
                     root: {
@@ -54,6 +68,9 @@ function MuiAppTheme({ children }: { children: React.ReactNode }) {
         </ThemeProvider>
     );
 }
+
+// This will set light / dark mode on load...
+initializeTheme();
 
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
@@ -93,6 +110,3 @@ createInertiaApp({
         color: '#4B5563',
     },
 });
-
-// This will set light / dark mode on load...
-initializeTheme();

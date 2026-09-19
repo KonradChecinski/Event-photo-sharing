@@ -59,7 +59,7 @@ it('allows only a superadmin to create an event administrator', function () {
     $event = Event::factory()->create();
     $manager = User::factory()->create();
     $manager->assignRole('event_admin');
-    $data = ['name' => 'New Manager', 'email' => 'manager@example.test', 'event_ids' => [$event->id]];
+    $data = ['name' => 'New Manager', 'email' => 'manager@example.test', 'role' => 'event_admin', 'event_ids' => [$event->id]];
 
     $this->actingAs($manager)->post('/admin/event-admins', $data)->assertForbidden();
     $superadmin = User::factory()->create();
@@ -68,4 +68,20 @@ it('allows only a superadmin to create an event administrator', function () {
 
     $created = User::where('email', $data['email'])->firstOrFail();
     expect($created->hasRole('event_admin'))->toBeTrue()->and($created->managedEvents)->toHaveCount(1);
+});
+
+it('allows a superadmin to create another superadmin without event assignments', function () {
+    Mail::fake();
+    $superadmin = User::factory()->create();
+    $superadmin->assignRole('superadmin');
+
+    $this->actingAs($superadmin)->post('/admin/event-admins', [
+        'name' => 'New Superadmin',
+        'email' => 'new-superadmin@example.test',
+        'role' => 'superadmin',
+        'event_ids' => [],
+    ])->assertRedirect();
+
+    $created = User::where('email', 'new-superadmin@example.test')->firstOrFail();
+    expect($created->hasRole('superadmin'))->toBeTrue()->and($created->managedEvents)->toHaveCount(0);
 });

@@ -23,8 +23,10 @@ import {
     MenuItem,
     Paper,
     Select,
+    Stack,
     Switch,
     Tooltip,
+    Typography,
     useMediaQuery,
 } from '@mui/material';
 import { motion } from 'motion/react';
@@ -158,22 +160,29 @@ export default function PhotosIndex({
     return (
         <>
             <Head title={`Galeria — ${event.name}`} />
-            <main className="mx-auto w-full max-w-[1800px] px-5 py-7 md:px-8 md:py-9">
-                <header className="mb-5 flex flex-col justify-between gap-4 border-b border-slate-200 pb-6 md:flex-row md:items-end dark:border-slate-700/80">
-                    <div>
-                        <p className="mb-2 text-xs font-semibold tracking-[.15em] text-blue-600 uppercase dark:text-blue-300">
-                            Galeria eventu
-                        </p>
-                        <h1 className="text-3xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
-                            {event.name}
-                        </h1>
-                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                            {photos.data.length} zdjęć na bieżącej stronie
-                        </p>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2">
+            <Box component="main" sx={{ width: '100%', p: { xs: 2, md: 3 } }}>
+                <Box
+                    component="header"
+                    sx={{
+                        display: 'flex',
+                        flexDirection: { xs: 'column', md: 'row' },
+                        justifyContent: 'space-between',
+                        alignItems: { md: 'flex-end' },
+                        gap: 2,
+                        mb: 2.5,
+                        pb: 3,
+                        borderBottom: '1px solid',
+                        borderColor: 'divider',
+                    }}
+                >
+                    <Box>
+                        <Typography variant="overline" sx={{ display: 'block', color: 'primary.main', fontWeight: 700, letterSpacing: '.12em' }}>Galeria eventu</Typography>
+                        <Typography variant="h4" sx={{ mt: .25, fontSize: '1.875rem', lineHeight: 1.2, fontWeight: 750, letterSpacing: '-.03em' }}>{event.name}</Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ mt: .75 }}>{photos.data.length} zdjęć na bieżącej stronie</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 1 }}>
                         <Button
-                            variant="text"
+                            variant="outlined"
                             href={`/admin/events/${event.uuid}`}
                         >
                             Ustawienia
@@ -205,17 +214,31 @@ export default function PhotosIndex({
                                 </Button>
                             </>
                         )}
-                    </div>
-                </header>
+                    </Box>
+                </Box>
                 <Paper
                     variant="outlined"
                     className="mb-5"
-                    sx={{ p: 1.25, borderRadius: 2, boxShadow: 'none' }}
+                    sx={{
+                        p: 1.25,
+                        borderRadius: 2,
+                        boxShadow: 'none',
+                        bgcolor: 'background.paper',
+                        color: 'text.primary',
+                    }}
                 >
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { sm: 'center' }, gap: 1.5 }}>
                         <Select
                             size="small"
                             value={sort}
+                            sx={{
+                                bgcolor: 'background.default',
+                                color: 'text.primary',
+                                '& .MuiOutlinedInput-notchedOutline': {
+                                    borderColor: 'divider',
+                                },
+                                '& .MuiSvgIcon-root': { color: 'text.secondary' },
+                            }}
                             onChange={(change) => {
                                 const value = change.target.value as
                                     'newest' | 'oldest';
@@ -246,17 +269,16 @@ export default function PhotosIndex({
                             }
                             label="Grupuj według użytkownika"
                         />
-                    </div>
+                    </Box>
                 </Paper>
                 {groups.map((group, number) => (
-                    <section
+                    <Box
+                        component="section"
                         key={grouped ? group[0]?.guest : 'all'}
-                        className="mb-7"
+                        sx={{ mb: 3.5 }}
                     >
                         {grouped && (
-                            <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">
-                                Użytkownik {number + 1}
-                            </h2>
+                            <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 700 }}>Użytkownik {number + 1}</Typography>
                         )}
                         <ImageList
                             variant="masonry"
@@ -344,11 +366,12 @@ export default function PhotosIndex({
                                                 />
                                             </Tooltip>
                                         ) : (
-                                            <div
-                                                className="photo-actions absolute top-2 right-2 z-20 flex gap-1 rounded-lg bg-slate-950/85 p-1 opacity-0 shadow-lg transition-opacity"
+                                            <Box
+                                                className="photo-actions"
                                                 onClick={(click) =>
                                                     click.stopPropagation()
                                                 }
+                                                sx={{ position: 'absolute', top: 8, right: 8, zIndex: 20, display: 'flex', gap: .5, p: .5, opacity: 0, borderRadius: 1, bgcolor: 'rgba(15, 23, 42, .88)', boxShadow: 3, transition: 'opacity .15s' }}
                                             >
                                                 <Tooltip title="Pobierz">
                                                     <IconButton
@@ -397,7 +420,7 @@ export default function PhotosIndex({
                                                         <DeleteOutlined fontSize="small" />
                                                     </IconButton>
                                                 </Tooltip>
-                                            </div>
+                                            </Box>
                                         )}
                                         {!isSelected && (
                                             <Checkbox
@@ -422,9 +445,9 @@ export default function PhotosIndex({
                                 );
                             })}
                         </ImageList>
-                    </section>
+                    </Box>
                 ))}
-            </main>
+            </Box>
             <Dialog
                 open={viewerIndex !== null}
                 onClose={closeViewer}
@@ -437,17 +460,15 @@ export default function PhotosIndex({
                         color: 'common.white',
                     }}
                 >
-                    <div className="relative z-20 flex h-16 items-center justify-between border-b border-white/10 px-3 sm:px-5">
-                        <div>
-                            <p className="text-sm font-medium">
+                    <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 20, height: 64, px: { xs: 1.5, sm: 2.5 }, borderBottom: '1px solid rgba(255,255,255,.1)' }}>
+                        <Box>
+                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
                                 {viewerIndex === null ? 0 : viewerIndex + 1} /{' '}
                                 {ordered.length}
-                            </p>
-                            <p className="text-xs text-slate-400">
-                                Podgląd zdjęcia
-                            </p>
-                        </div>
-                        <div className="flex items-center gap-1">
+                            </Typography>
+                            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,.62)' }}>Podgląd zdjęcia</Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 0.5 }}>
                             <Button
                                 color="inherit"
                                 size="small"
@@ -464,8 +485,8 @@ export default function PhotosIndex({
                             >
                                 <Close />
                             </IconButton>
-                        </div>
-                    </div>
+                        </Box>
+                    </Box>
                     <Swiper
                         key={slideshow ? 'slideshow' : 'manual'}
                         modules={[
@@ -494,7 +515,7 @@ export default function PhotosIndex({
                     >
                         {ordered.map((photo) => (
                             <SwiperSlide key={photo.uuid}>
-                                <div className="swiper-zoom-container">
+                                <Box className="swiper-zoom-container">
                                     <img
                                         src={photo.preview}
                                         alt="Podgląd zdjęcia"
@@ -504,7 +525,7 @@ export default function PhotosIndex({
                                             objectFit: 'contain',
                                         }}
                                     />
-                                </div>
+                                </Box>
                             </SwiperSlide>
                         ))}
                     </Swiper>
@@ -516,7 +537,7 @@ export default function PhotosIndex({
                     Ta operacja jest nieodwracalna i usuwa pliki ze Storage.
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setDeleteDialog(false)}>
+                    <Button variant="outlined" onClick={() => setDeleteDialog(false)}>
                         Anuluj
                     </Button>
                     <Button color="error" variant="contained" onClick={remove}>
@@ -530,8 +551,11 @@ export default function PhotosIndex({
                     Czy dołączyć zdjęcia usunięte przez gości imprezy?
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setAllDialog(false)}>Anuluj</Button>
+                    <Button variant="outlined" onClick={() => setAllDialog(false)}>
+                        Anuluj
+                    </Button>
                     <Button
+                        variant="outlined"
                         onClick={() => {
                             setAllDialog(false);
                             downloadZip({
