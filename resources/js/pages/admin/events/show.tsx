@@ -204,7 +204,14 @@ export default function EventShow({
                         </Box>
                     </Box>
 
-                    <Grid container spacing={2}>
+                    <Grid
+                        container
+                        spacing={2}
+                        // direction={{ xs: 'column-reverse', md: 'row' }}
+                        sx={{
+                            flexDirection: { xs: 'column-reverse', md: 'row' },
+                        }}
+                    >
                         <Grid size={{ xs: 12, md: 8 }}>
                             <Box
                                 component="form"
@@ -305,17 +312,14 @@ export default function EventShow({
                                             <CardContent sx={{ p: 3 }}>
                                                 {/* Status and dates */}
                                                 <Stack
-                                                    direction={{
-                                                        xs: 'row',
-                                                        sm: 'column',
-                                                    }}
+                                                    direction={'column'}
                                                     spacing={2}
                                                     sx={{
                                                         alignItems: 'center',
                                                     }}
                                                 >
                                                     <FormControl
-                                                        sx={{ minWidth: 200 }}
+                                                        sx={{ width: 1 }}
                                                     >
                                                         <InputLabel id="status-label">
                                                             Status
@@ -354,6 +358,7 @@ export default function EventShow({
                                                     <DateTimePicker
                                                         label="Początek"
                                                         value={startsAtDay}
+                                                        sx={{ width: 1 }}
                                                         onChange={
                                                             handleStartsAtChange
                                                         }
@@ -361,6 +366,7 @@ export default function EventShow({
                                                     <DateTimePicker
                                                         label="Zakończenie"
                                                         value={endsAtDay}
+                                                        sx={{ width: 1 }}
                                                         onChange={
                                                             handleEndsAtChange
                                                         }
@@ -429,7 +435,13 @@ export default function EventShow({
                                         </CardContent>
                                     </Card>
 
-                                    <Stack spacing={2} direction="row">
+                                    <Stack
+                                        spacing={2}
+                                        direction={{
+                                            xs: 'column',
+                                            sm: 'row',
+                                        }}
+                                    >
                                         <Card
                                             variant="outlined"
                                             sx={{
@@ -602,7 +614,10 @@ export default function EventShow({
                             </Box>
                         </Grid>
 
-                        <Grid size={{ xs: 12, md: 4 }}>
+                        <Grid
+                            size={{ xs: 12, md: 4 }}
+                            sx={{ mb: { xs: 8, md: 0 } }}
+                        >
                             <Stack spacing={2}>
                                 <Grid container size={12} spacing={2}>
                                     {[
