@@ -55,14 +55,13 @@ type Photo = {
     guest: string;
 };
 type Event = { uuid: string; name: string };
-type Paginated = { data: Photo[] };
 
 export default function PhotosIndex({
     event,
     photos,
 }: {
     event: Event;
-    photos: Paginated;
+    photos: Photo[];
 }) {
     const { enqueueSnackbar } = useSnackbar();
     const wide = useMediaQuery('(min-width:1536px)');
@@ -78,12 +77,12 @@ export default function PhotosIndex({
     const [allDialog, setAllDialog] = useState(false);
     const ordered = useMemo(
         () =>
-            [...photos.data].sort((a, b) =>
+            [...photos].sort((a, b) =>
                 sort === 'newest'
                     ? b.createdAt.localeCompare(a.createdAt)
                     : a.createdAt.localeCompare(b.createdAt),
             ),
-        [photos.data, sort],
+        [photos, sort],
     );
     const groups = useMemo(
         () =>
@@ -178,7 +177,7 @@ export default function PhotosIndex({
                     <Box>
                         <Typography variant="overline" sx={{ display: 'block', color: 'primary.main', fontWeight: 700, letterSpacing: '.12em' }}>Galeria eventu</Typography>
                         <Typography variant="h4" sx={{ mt: .25, fontSize: '1.875rem', lineHeight: 1.2, fontWeight: 750, letterSpacing: '-.03em' }}>{event.name}</Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ mt: .75 }}>{photos.data.length} zdjęć na bieżącej stronie</Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ mt: .75 }}>{photos.length} zdjęć</Typography>
                     </Box>
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 1 }}>
                         <Button

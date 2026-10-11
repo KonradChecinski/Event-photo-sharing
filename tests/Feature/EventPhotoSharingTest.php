@@ -6,7 +6,9 @@ use App\Models\Photo;
 use App\Models\User;
 use App\Services\PhotoStorageService;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
+use Inertia\Testing\AssertableInertia as Assert;
 use Spatie\Permission\Models\Role;
 
 function guestCookie(Event $event, EventGuest $guest, string $token): array
@@ -91,6 +93,31 @@ it('isolates event admins and gives superadmins access to all events', function 
     $this->actingAs($manager)->get(route('admin.events.show', $first))->assertSuccessful();
     $this->actingAs($manager)->get(route('admin.events.show', $second))->assertForbidden();
     $this->actingAs($superadmin)->get(route('admin.events.show', $second))->assertSuccessful();
+});
+
+it('shows all event photos in the admin gallery with their gallery attributes', function () {
+    Role::findOrCreate('superadmin');
+    $event = Event::factory()->create();
+    $admin = User::factory()->create();
+    $admin->assignRole('superadmin');
+    $createdPhotos = collect(range(1, 37))
+        ->map(fn () => Photo::factory()->for($event)->create());
+    $expectedUuids = $createdPhotos->pluck('uuid')->sort()->values()->all();
+
+    $this->actingAs($admin)
+        ->get(route('admin.photos.index', $event))
+        ->assertSuccessful()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('admin/photos/index')
+            ->where('photos', function (Collection $photos) use ($expectedUuids): bool {
+                $actualUuids = $photos->pluck('uuid')->sort()->values()->all();
+                $expectedAttributes = ['uuid', 'thumbnail', 'preview', 'deletedAt', 'createdAt', 'guest'];
+
+                return $photos->count() === 37
+                    && $actualUuids === $expectedUuids
+                    && $photos->every(fn (array $photo): bool => array_keys($photo) === $expectedAttributes);
+            }),
+        );
 });
 
 it('permanently deletes photo files for an authorized administrator', function () {

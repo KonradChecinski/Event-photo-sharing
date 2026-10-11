@@ -17,21 +17,23 @@ class PhotoController extends Controller
     {
         $this->authorize('view', $event);
 
+        $photoData = fn (Photo $photo): array => [
+            'uuid' => $photo->uuid,
+            'thumbnail' => route('admin.photos.file', [$event, $photo, 'thumbnail']),
+            'preview' => route('admin.photos.file', [$event, $photo, 'preview']),
+            'deletedAt' => $photo->deleted_at?->toIso8601String(),
+            'createdAt' => $photo->created_at->toIso8601String(),
+            'guest' => $photo->guest->uuid,
+        ];
+
         return inertia('admin/photos/index',
             [
                 'event' => $event,
                 'photos' => $event->photos()->with('guest:id,uuid')
                     ->orderBy('created_at', $request->string('sort')->value() === 'oldest' ? 'asc' : 'desc')
-//                    ->paginate(36)
-                    ->through(fn ($photo) => [
-                        'uuid' => $photo->uuid,
-                        'thumbnail' => route('admin.photos.file', [$event, $photo, 'thumbnail']),
-                        'preview' => route('admin.photos.file', [$event, $photo, 'preview']),
-                        'deletedAt' => $photo->deleted_at?->toIso8601String(),
-                        'createdAt' => $photo->created_at->toIso8601String(),
-                        'guest' => $photo->guest->uuid,
-                    ]
-                    ),
+                    // Previous pagination: ->paginate(36)->through($photoData)
+                    ->get()
+                    ->map($photoData),
             ]
         );
     }
