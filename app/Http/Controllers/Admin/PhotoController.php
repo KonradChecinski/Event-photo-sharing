@@ -22,7 +22,7 @@ class PhotoController extends Controller
                 'event' => $event,
                 'photos' => $event->photos()->with('guest:id,uuid')
                     ->orderBy('created_at', $request->string('sort')->value() === 'oldest' ? 'asc' : 'desc')
-                    ->paginate(36)
+//                    ->paginate(36)
                     ->through(fn ($photo) => [
                         'uuid' => $photo->uuid,
                         'thumbnail' => route('admin.photos.file', [$event, $photo, 'thumbnail']),
